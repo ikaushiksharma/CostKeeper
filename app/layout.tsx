@@ -1,13 +1,8 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import type { PropsWithChildren } from 'react'
-import {
-    ClerkProvider,
-    SignInButton,
-    SignedIn,
-    SignedOut,
-    UserButton,
-} from '@clerk/nextjs'
+import { ClerkProvider } from '@clerk/nextjs'
+import { QueryProviders } from '@/providers/query-provider'
 
 import './globals.css'
 
@@ -22,7 +17,9 @@ const RootLayout = ({ children }: Readonly<PropsWithChildren>) => {
     return (
         <ClerkProvider>
             <html lang="en">
-                <body className={inter.className}>{children}</body>
+                <body className={inter.className}>
+                    <QueryProviders>{children}</QueryProviders>
+                </body>
             </html>
         </ClerkProvider>
     )
