@@ -1,4 +1,5 @@
 npm run format:fix
 npm run lint
-npm run lint-staged --concurrent false
+git add .
+# npm run lint-staged --concurrent false
 # npm run build
