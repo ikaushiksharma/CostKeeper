@@ -1,4 +1,3 @@
-import { Loader2 } from 'lucide-react'
 import { z } from 'zod'
 
 import {
@@ -13,6 +12,7 @@ import { useCreateAccount } from '@/features/accounts/api/use-create-account'
 import { useGetAccounts } from '@/features/accounts/api/use-get-accounts'
 import { useCreateCategory } from '@/features/categories/api/use-create-category'
 import { useGetCategories } from '@/features/categories/api/use-get-categories'
+import { useCreateTransaction } from '@/features/transactions/api/use-create-transaction'
 import { useDeleteTransaction } from '@/features/transactions/api/use-delete-transaction'
 import { useEditTransaction } from '@/features/transactions/api/use-edit-transaction'
 import { useGetTransaction } from '@/features/transactions/api/use-get-transaction'
@@ -20,6 +20,7 @@ import { useOpenTransaction } from '@/features/transactions/hooks/use-open-trans
 import { useConfirm } from '@/hooks/use-confirm'
 
 import { TransactionForm } from './transcation-form'
+import { Loader2 } from 'lucide-react'
 
 const formSchema = insertTransactionSchema.omit({ id: true })
 
@@ -37,6 +38,7 @@ export const EditTransactionSheet = () => {
     const editMutation = useEditTransaction(id)
     const deleteMutation = useDeleteTransaction(id)
 
+    const createMutation = useCreateTransaction()
     const categoryMutation = useCreateCategory()
     const categoryQuery = useGetCategories()
     const categoryOptions = (categoryQuery.data ?? []).map((category) => ({
@@ -121,7 +123,7 @@ export const EditTransactionSheet = () => {
 
                     {isLoading ? (
                         <div className="absolute inset-0 flex items-center justify-center">
-                            <Loader2 className="size-4 animate-spin text-muted-foreground" />
+                            <Loader2 className="size-4 text-muted-foreground animate-spin" />
                         </div>
                     ) : (
                         <TransactionForm
