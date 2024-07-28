@@ -3,8 +3,9 @@ import { Inter } from 'next/font/google'
 import type { PropsWithChildren } from 'react'
 import { ClerkProvider } from '@clerk/nextjs'
 import { QueryProviders } from '@/providers/query-provider'
-
+import { SheetProvider } from '@/providers/sheet-provider'
 import './globals.css'
+import { Toaster } from '@/components/ui/sonner'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -18,7 +19,11 @@ const RootLayout = ({ children }: Readonly<PropsWithChildren>) => {
         <ClerkProvider>
             <html lang="en">
                 <body className={inter.className}>
-                    <QueryProviders>{children}</QueryProviders>
+                    <QueryProviders>
+                        <SheetProvider />
+                        <Toaster richColors theme="light" />
+                        {children}
+                    </QueryProviders>
                 </body>
             </html>
         </ClerkProvider>
