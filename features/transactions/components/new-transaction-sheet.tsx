@@ -14,9 +14,9 @@ import { useGetAccounts } from '@/features/accounts/api/use-get-accounts'
 import { useCreateCategory } from '@/features/categories/api/use-create-category'
 import { useGetCategories } from '@/features/categories/api/use-get-categories'
 import { useCreateTransaction } from '@/features/transactions/api/use-create-transaction'
-import { useNewTransaction } from '@/features/transactions/hooks/use-new-transcation'
+import { useNewTransaction } from '@/features/transactions/hooks/use-new-transaction'
 
-import { TransactionForm } from './transcation-form'
+import { TransactionForm } from './transaction-form'
 
 const formSchema = insertTransactionSchema.omit({ id: true })
 

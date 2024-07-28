@@ -12,7 +12,7 @@ import { useSelectAccount } from '@/features/accounts/hooks/use-select-account'
 import { useBulkCreateTransactions } from '@/features/transactions/api/use-bulk-create-transactions'
 import { useBulkDeleteTransactions } from '@/features/transactions/api/use-bulk-delete-transactions'
 import { useGetTransactions } from '@/features/transactions/api/use-get-transactions'
-import { useNewTransaction } from '@/features/transactions/hooks/use-new-transcation'
+import { useNewTransaction } from '@/features/transactions/hooks/use-new-transaction'
 
 import { columns } from './columns'
 import { ImportCard } from './import-card'

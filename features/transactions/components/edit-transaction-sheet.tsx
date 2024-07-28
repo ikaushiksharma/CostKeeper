@@ -18,7 +18,7 @@ import { useGetTransaction } from '@/features/transactions/api/use-get-transacti
 import { useOpenTransaction } from '@/features/transactions/hooks/use-open-transaction'
 import { useConfirm } from '@/hooks/use-confirm'
 
-import { TransactionForm } from './transcation-form'
+import { TransactionForm } from './transaction-form'
 import { Loader2 } from 'lucide-react'
 
 const formSchema = insertTransactionSchema.omit({ id: true })
