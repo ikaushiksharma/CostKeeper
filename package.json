@@ -1,5 +1,5 @@
 {
-    "name": "fin-app",
+    "name": "cost-keeper",
     "version": "0.1.0",
     "private": true,
     "scripts": {
@@ -11,8 +11,8 @@
         "format": "prettier --check .",
         "format:fix": "prettier --write --list-different .",
         "prepare": "husky",
-        "db:generate": "drizzle-kit generate:pg --schema db/schema.ts --out ./drizzle",
-        "db:migrate": "bun ./scripts/migrate.ts",
+        "db:generate": "drizzle-kit generate",
+        "db:migrate": "drizzle-kit migrate",
         "db:studio": "drizzle-kit studio"
     },
     "dependencies": {
@@ -70,7 +70,7 @@
         "@types/react": "^18",
         "@types/react-dom": "^18",
         "dotenv": "^16.4.5",
-        "drizzle-kit": "0.20.17",
+        "drizzle-kit": "^0.21.2",
         "eslint": "^8",
         "eslint-config-next": "14.2.5",
         "eslint-config-prettier": "^9.1.0",
