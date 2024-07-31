@@ -27,7 +27,7 @@ export const DateFilter = () => {
     const from = searchParams.get('from') || ''
     const to = searchParams.get('to') || ''
 
-    const defaultTo = parseISO(new Date().toISOString())
+    const defaultTo = new Date()
     const defaultFrom = startOfMonth(defaultTo)
 
     const paramState = {
@@ -82,16 +82,7 @@ export const DateFilter = () => {
                     mode="range"
                     defaultMonth={date?.from}
                     selected={date}
-                    onSelect={(date) =>
-                        setDate({
-                            from: date?.from
-                                ? parseISO(date.from?.toISOString())
-                                : undefined,
-                            to: date?.to
-                                ? parseISO(date.to?.toISOString())
-                                : undefined,
-                        })
-                    }
+                    onSelect={setDate}
                     numberOfMonths={2}
                 />
 

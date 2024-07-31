@@ -1,7 +1,7 @@
 import { clerkMiddleware, getAuth } from '@hono/clerk-auth'
 import { zValidator } from '@hono/zod-validator'
 import { createId } from '@paralleldrive/cuid2'
-import { parse, subDays } from 'date-fns'
+import { parse, startOfMonth } from 'date-fns'
 import { and, desc, eq, gte, inArray, lte, sql } from 'drizzle-orm'
 import { Hono } from 'hono'
 import { z } from 'zod'
@@ -35,7 +35,7 @@ const app = new Hono()
             }
 
             const defaultTo = new Date()
-            const defaultFrom = subDays(defaultTo, 30)
+            const defaultFrom = startOfMonth(defaultTo)
 
             const startDate = from
                 ? parse(from, 'yyyy-MM-dd', new Date())

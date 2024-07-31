@@ -3,7 +3,13 @@ import { accounts, categories, transactions } from '@/db/schema'
 import { calculatePercentageChange, fillMissingDays } from '@/lib/utils'
 import { clerkMiddleware, getAuth } from '@hono/clerk-auth'
 import { zValidator } from '@hono/zod-validator'
-import { differenceInDays, parse, startOfMonth, subDays } from 'date-fns'
+import {
+    addDays,
+    differenceInDays,
+    parse,
+    startOfMonth,
+    subDays,
+} from 'date-fns'
 import { and, desc, eq, gte, lt, lte, sql, sum } from 'drizzle-orm'
 import { Hono } from 'hono'
 import { z } from 'zod'
@@ -34,9 +40,9 @@ const app = new Hono().get(
             : defaultFrom
         const endDate = to ? parse(to, 'yyyy-MM-dd', new Date()) : defaultTo
 
-        const periodLength = differenceInDays(endDate, startDate) + 1
-        const lastPeriodStart = subDays(startDate, periodLength)
-        const lastPeriodEnd = subDays(endDate, periodLength)
+        // const periodLength = differenceInDays(endDate, startDate)
+        // const lastPeriodStart = subDays(startDate, periodLength)
+        // const lastPeriodEnd = subDays(endDate, periodLength)
 
         async function fetchFinancialData(
             userId: string,
@@ -73,26 +79,26 @@ const app = new Hono().get(
             startDate,
             endDate
         )
-        const [lastPeriod] = await fetchFinancialData(
-            auth.userId,
-            lastPeriodStart,
-            lastPeriodEnd
-        )
+        // const [lastPeriod] = await fetchFinancialData(
+        //     auth.userId,
+        //     lastPeriodStart,
+        //     lastPeriodEnd
+        // )
 
-        const incomeChange = calculatePercentageChange(
-            currentPeriod.income,
-            lastPeriod.income
-        )
+        // const incomeChange = calculatePercentageChange(
+        //     currentPeriod.income,
+        //     lastPeriod.income
+        // )
 
-        const expensesChange = calculatePercentageChange(
-            currentPeriod.expenses,
-            lastPeriod.expenses
-        )
+        // const expensesChange = calculatePercentageChange(
+        //     currentPeriod.expenses,
+        //     lastPeriod.expenses
+        // )
 
-        const remainingChange = calculatePercentageChange(
-            currentPeriod.remaining,
-            lastPeriod.remaining
-        )
+        // const remainingChange = calculatePercentageChange(
+        //     currentPeriod.remaining,
+        //     lastPeriod.remaining
+        // )
 
         const category = await db
             .select({
@@ -155,15 +161,14 @@ const app = new Hono().get(
             .orderBy(transactions.date)
 
         const days = fillMissingDays(activeDays, startDate, endDate)
-
         return ctx.json({
             data: {
                 remainingAmount: currentPeriod.remaining,
-                remainingChange,
+                // remainingChange,
                 incomeAmount: currentPeriod.income,
-                incomeChange,
+                // incomeChange,
                 expensesAmount: currentPeriod.expenses,
-                expensesChange,
+                // expensesChange,
                 categories: finalCategories,
                 days,
             },
