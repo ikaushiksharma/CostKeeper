@@ -1,6 +1,6 @@
 'use client'
 
-import { format, startOfMonth, subDays } from 'date-fns'
+import { format, parseISO, startOfMonth, subDays } from 'date-fns'
 import { ChevronDown } from 'lucide-react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import qs from 'query-string'
@@ -27,7 +27,7 @@ export const DateFilter = () => {
     const from = searchParams.get('from') || ''
     const to = searchParams.get('to') || ''
 
-    const defaultTo = new Date()
+    const defaultTo = parseISO(new Date().toISOString())
     const defaultFrom = startOfMonth(defaultTo)
 
     const paramState = {
@@ -43,7 +43,6 @@ export const DateFilter = () => {
             to: format(dateRange?.to || defaultTo, 'yyyy-MM-dd'),
             accountId,
         }
-        console.log('query', query)
 
         const url = qs.stringifyUrl(
             {
@@ -83,7 +82,16 @@ export const DateFilter = () => {
                     mode="range"
                     defaultMonth={date?.from}
                     selected={date}
-                    onSelect={setDate}
+                    onSelect={(date) =>
+                        setDate({
+                            from: date?.from
+                                ? parseISO(date.from?.toISOString())
+                                : undefined,
+                            to: date?.to
+                                ? parseISO(date.to?.toISOString())
+                                : undefined,
+                        })
+                    }
                     numberOfMonths={2}
                 />
 
