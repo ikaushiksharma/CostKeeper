@@ -7,6 +7,7 @@ import { SheetProvider } from '@/providers/sheet-provider'
 import './globals.css'
 import { Toaster } from '@/components/ui/sonner'
 import { siteConfig } from '@/config'
+import { ThemeProvider } from '@/providers/theme-provider'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -24,7 +25,14 @@ const RootLayout = ({ children }: Readonly<PropsWithChildren>) => {
                     <QueryProviders>
                         <SheetProvider />
                         <Toaster richColors theme="light" />
-                        {children}
+                        <ThemeProvider
+                            attribute="class"
+                            defaultTheme="system"
+                            enableSystem
+                            disableTransitionOnChange
+                        >
+                            {children}
+                        </ThemeProvider>{' '}
                     </QueryProviders>
                 </body>
             </html>

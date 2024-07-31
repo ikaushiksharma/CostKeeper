@@ -8,6 +8,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 
 import { links } from '@/config'
+import { ThemeToggle } from './theme-toggle'
 export const Header = () => {
     return (
         <header className="bg-gradient-to-b from-blue-700 to-blue-500 px-4 py-8 lg:px-14 lg:pb-32">
@@ -20,7 +21,7 @@ export const Header = () => {
 
                     <div className="flex items-center gap-x-2">
                         <ClerkLoaded>
-                            <UserButton afterSignOutUrl="/" />
+                            <UserButton />
                         </ClerkLoaded>
 
                         <ClerkLoading>
@@ -40,6 +41,7 @@ export const Header = () => {
                                 width={24}
                             />
                         </Link>
+                        <ThemeToggle />
                     </div>
                 </div>
                 <WelcomeMsg />

@@ -9,6 +9,7 @@ import {
 } from 'recharts'
 
 import { CustomTooltip } from '@/components/custom-tooltip'
+import { useTheme } from 'next-themes'
 
 type LineVariantProps = {
     data: {
@@ -19,10 +20,14 @@ type LineVariantProps = {
 }
 
 export const LineVariant = ({ data }: LineVariantProps) => {
+    const { theme } = useTheme()
     return (
         <ResponsiveContainer width="100%" height={350}>
             <LineChart data={data}>
-                <CartesianGrid strokeDasharray="3 3" />
+                <CartesianGrid
+                    stroke={theme === 'dark' ? '#1E293B' : '#e2e8f0'}
+                    strokeDasharray="3 3"
+                />
 
                 <XAxis
                     axisLine={false}

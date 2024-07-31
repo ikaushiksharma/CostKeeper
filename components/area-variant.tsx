@@ -9,6 +9,7 @@ import {
 } from 'recharts'
 
 import { CustomTooltip } from './custom-tooltip'
+import { useTheme } from 'next-themes'
 
 type AreaVariantProps = {
     data: {
@@ -19,10 +20,14 @@ type AreaVariantProps = {
 }
 
 export const AreaVariant = ({ data }: AreaVariantProps) => {
+    const { theme } = useTheme()
     return (
         <ResponsiveContainer width="100%" height={350}>
             <AreaChart data={data}>
-                <CartesianGrid strokeDasharray="3 3" />
+                <CartesianGrid
+                    stroke={theme === 'dark' ? '#1E293B' : '#e2e8f0'}
+                    strokeDasharray="3 3"
+                />
                 <defs>
                     <linearGradient id="income" x1="0" y1="0" x2="0" y2="1">
                         <stop
