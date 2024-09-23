@@ -7,7 +7,18 @@ import {
 
 import { formatCurrency } from '@/lib/utils'
 
-const COLORS = ['#0062FF', '#12C6FF', '#FF647F', '#FF9354']
+const COLORS = [
+    // blue
+    '#0062FF',
+    // light blue
+    '#12C6FF',
+    // red
+    '#FF647F',
+    // orange
+    '#FF9354',
+    // purple
+    '#FF00FF',
+]
 
 type RadialVariantProps = {
     data: {
