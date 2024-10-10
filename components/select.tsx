@@ -37,11 +37,32 @@ export const Select = ({
             placeholder={placeholder}
             className="text-sm h-10 bg-background"
             styles={{
+                menuList: (base) => ({
+                    ...base,
+                    backgroundColor: 'hsl(var(--background))',
+                }),
+                input: (base) => ({
+                    ...base,
+                    color: 'hsl(var(--foreground))',
+                }),
+                singleValue(base) {
+                    return {
+                        ...base,
+                        color: 'hsl(var(--foreground))',
+                    }
+                },
+                option: (base, { isFocused }) => ({
+                    ...base,
+                    backgroundColor: isFocused
+                        ? 'hsl(var(--input))'
+                        : 'hsl(var(--background))',
+                }),
                 control: (base) => ({
                     ...base,
-                    borderColor: '#e2e8f0',
+                    backgroundColor: 'hsl(var(--background))',
+                    borderColor: 'hsl(var(--input))',
                     ':hover': {
-                        borderColor: '#e2e8f0',
+                        borderColor: 'hsl(var(--input))',
                     },
                 }),
             }}
