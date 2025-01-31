@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useRef, useState, type JSX } from 'react';
 import { Select } from '@/components/select'
 import { Button } from '@/components/ui/button'
 import {
@@ -33,7 +33,7 @@ export const useSelectAccount = (): [
         resolve: (value: string | undefined) => void
     } | null>(null)
 
-    const selectValue = useRef<string>()
+    const selectValue = useRef<string>(undefined)
 
     const confirm = () =>
         new Promise((resolve) => {
