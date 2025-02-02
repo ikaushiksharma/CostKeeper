@@ -1,4 +1,4 @@
-import { useRef, useState, type JSX } from 'react';
+import { useRef, useState, type JSX } from 'react'
 import { Select } from '@/components/select'
 import { Button } from '@/components/ui/button'
 import {
