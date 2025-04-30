@@ -19,6 +19,9 @@ import { Textarea } from '@/components/ui/textarea'
 import { insertTransactionSchema } from '@/db/schema'
 import { convertAmountToMilliunits } from '@/lib/utils'
 import { DateTimePicker } from '@/components/date-time-picker'
+import { DatePicker } from '@/components/date-picker'
+import { useEffect, useState } from 'react'
+import { useGetSettings } from '@/features/settings/api/use-get-settings'
 
 const formSchema = z.object({
     date: z.coerce.date(),
@@ -59,10 +62,20 @@ export const TransactionForm = ({
     onCreateAccount,
     onCreateCategory,
 }: TransactionFormProps) => {
+    const [onlyDate, setOnlyDate] = useState(false)
     const form = useForm<FormValues>({
         resolver: zodResolver(formSchema),
         defaultValues,
     })
+
+    const settingsQuery = useGetSettings()
+    const settings = settingsQuery.data
+
+    useEffect(() => {
+        if (settings) {
+            setOnlyDate(!settings?.dateTimeMode)
+        }
+    }, [settings])
 
     const handleSubmit = (values: FormValues) => {
         const amount = parseFloat(values.amount)
@@ -91,11 +104,19 @@ export const TransactionForm = ({
                     render={({ field }) => (
                         <FormItem>
                             <FormControl>
-                                <DateTimePicker
-                                    value={field.value}
-                                    onChange={field.onChange}
-                                    disabled={disabled}
-                                />
+                                {onlyDate ? (
+                                    <DatePicker
+                                        value={field.value}
+                                        onChange={field.onChange}
+                                        disabled={disabled}
+                                    />
+                                ) : (
+                                    <DateTimePicker
+                                        value={field.value}
+                                        onChange={field.onChange}
+                                        disabled={disabled}
+                                    />
+                                )}
                             </FormControl>
 
                             <FormMessage />
