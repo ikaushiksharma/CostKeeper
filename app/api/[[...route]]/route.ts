@@ -4,6 +4,7 @@ import accounts from './accounts'
 import categories from './categories'
 import transactions from './transactions'
 import summary from './summary'
+import settings from './settings'
 export const runtime = 'edge'
 
 const app = new Hono().basePath('/api')
@@ -13,6 +14,7 @@ const routes = app
     .route('/categories', categories)
     .route('/summary', summary)
     .route('/transactions', transactions)
+    .route('/settings', settings)
 
 export const GET = handle(app)
 export const POST = handle(app)

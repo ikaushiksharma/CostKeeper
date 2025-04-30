@@ -32,7 +32,7 @@ const RootLayout = ({ children }: Readonly<PropsWithChildren>) => {
                             disableTransitionOnChange
                         >
                             {children}
-                        </ThemeProvider>{' '}
+                        </ThemeProvider>
                     </QueryProviders>
                 </body>
             </html>

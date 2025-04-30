@@ -1,5 +1,5 @@
 import { relations } from 'drizzle-orm'
-import { integer, pgTable, text, timestamp } from 'drizzle-orm/pg-core'
+import { integer, pgTable, text, timestamp, boolean } from 'drizzle-orm/pg-core'
 import { createInsertSchema } from 'drizzle-zod'
 import { z } from 'zod'
 
@@ -20,6 +20,7 @@ export const categories = pgTable('categories', {
     name: text('name').notNull(),
     userId: text('user_id').notNull(),
 })
+
 export const categoriesRelations = relations(categories, ({ many }) => ({
     transactions: many(transactions),
 }))
@@ -55,4 +56,9 @@ export const transactionsRelations = relations(transactions, ({ one }) => ({
 
 export const insertTransactionSchema = createInsertSchema(transactions, {
     date: z.coerce.date(),
+})
+
+export const settings = pgTable('settings', {
+    dateTimeMode: boolean('date_time_mode').default(false),
+    userId: text('user_id').primaryKey(),
 })
