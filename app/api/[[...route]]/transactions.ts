@@ -138,16 +138,11 @@ const app = new Hono()
             if (!auth?.userId) {
                 return ctx.json({ error: 'Unauthorized.' }, 401)
             }
-            let date = values.date
-            date.setHours(date.getHours() + 5)
-            date.setMinutes(date.getMinutes() + 30)
-            values.date = date
             const [data] = await db
                 .insert(transactions)
                 .values({
                     id: createId(),
                     ...values,
-                    date,
                 })
                 .returning()
 

@@ -6,12 +6,11 @@ import { WelcomeMsg } from './welcome-msg'
 import { Filters } from './filters'
 import Image from 'next/image'
 import Link from 'next/link'
-
 import { links } from '@/config'
 import { ThemeToggle } from './theme-toggle'
 export const Header = () => {
     return (
-        <header className="bg-gradient-to-b from-blue-700 to-blue-500 px-4 py-8 lg:px-14 lg:pb-32">
+        <header className="bg-gradient-to-b from-blue-700 to-blue-500 px-4 py-8 lg:px-14 lg:pb-20">
             <div className="max-w-screen-2xl mx-auto">
                 <div className="w-full flex items-center justify-between mb-14">
                     <div className="flex items-center lg:gap-x-16">
@@ -20,6 +19,8 @@ export const Header = () => {
                     </div>
 
                     <div className="flex items-center gap-x-2">
+                        <ThemeToggle />
+
                         <ClerkLoaded>
                             <UserButton />
                         </ClerkLoaded>
@@ -41,7 +42,6 @@ export const Header = () => {
                                 width={24}
                             />
                         </Link>
-                        <ThemeToggle />
                     </div>
                 </div>
                 <WelcomeMsg />
