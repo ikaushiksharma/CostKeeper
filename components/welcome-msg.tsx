@@ -28,7 +28,7 @@ export const WelcomeMsg = () => {
     const getPageTitle = () => {
         switch (pathname) {
             case '/':
-                return `Welcome back ${isLoaded ? ', ' : ' '}${user?.firstName} 👋`
+                return `Welcome back ${isLoaded ? ', ' + user?.firstName : ' '} 👋`
             case '/transactions':
                 return 'Your Transactions'
             case '/accounts':

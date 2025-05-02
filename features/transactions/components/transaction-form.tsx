@@ -62,7 +62,7 @@ export const TransactionForm = ({
     onCreateAccount,
     onCreateCategory,
 }: TransactionFormProps) => {
-    const [onlyDate, setOnlyDate] = useState(false)
+    const [onlyDate, setOnlyDate] = useState(true)
     const form = useForm<FormValues>({
         resolver: zodResolver(formSchema),
         defaultValues,
@@ -72,8 +72,8 @@ export const TransactionForm = ({
     const settings = settingsQuery.data
 
     useEffect(() => {
-        if (settings) {
-            setOnlyDate(!settings?.dateTimeMode)
+        if (settings?.dateTimeMode) {
+            setOnlyDate(false)
         }
     }, [settings])
 
