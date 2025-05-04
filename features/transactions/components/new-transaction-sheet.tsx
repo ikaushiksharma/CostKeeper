@@ -59,7 +59,7 @@ export const NewTransactionSheet = () => {
 
     return (
         <Sheet open={isOpen || isPending} onOpenChange={onClose}>
-            <SheetContent className="space-y-4">
+            <SheetContent className="space-y-4 opacity-50">
                 <SheetHeader>
                     <SheetTitle>New Transaction</SheetTitle>
 
