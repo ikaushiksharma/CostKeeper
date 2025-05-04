@@ -26,8 +26,8 @@ import { useGetSettings } from '@/features/settings/api/use-get-settings'
 const formSchema = z.object({
     date: z.coerce.date(),
     accountId: z.string(),
-    categoryId: z.string().nullable().optional(),
-    payee: z.string(),
+    categoryId: z.string(),
+    payee: z.string().nullable().optional(),
     amount: z.string(),
     notes: z.string().nullable().optional(),
 })
@@ -185,6 +185,7 @@ export const TransactionForm = ({
                                     disabled={disabled}
                                     placeholder="Add a payee"
                                     {...field}
+                                    value={field.value || ''}
                                 />
                             </FormControl>
 

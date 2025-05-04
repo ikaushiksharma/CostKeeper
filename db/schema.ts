@@ -30,7 +30,7 @@ export const insertCategorySchema = createInsertSchema(categories)
 export const transactions = pgTable('transactions', {
     id: text('id').primaryKey(),
     amount: integer('amount').notNull(),
-    payee: text('payee').notNull(),
+    payee: text('payee'),
     notes: text('notes'),
     date: timestamp('date', { mode: 'date' }).notNull(),
     accountId: text('account_id')
@@ -38,9 +38,11 @@ export const transactions = pgTable('transactions', {
             onDelete: 'cascade',
         })
         .notNull(),
-    categoryId: text('category_id').references(() => categories.id, {
-        onDelete: 'set null',
-    }),
+    categoryId: text('category_id')
+        .references(() => categories.id, {
+            onDelete: 'set null',
+        })
+        .notNull(),
 })
 
 export const transactionsRelations = relations(transactions, ({ one }) => ({
