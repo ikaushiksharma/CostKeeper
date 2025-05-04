@@ -110,7 +110,7 @@ export const EditTransactionSheet = () => {
         <>
             <ConfirmDialog />
             <Sheet open={isOpen || isPending} onOpenChange={onClose}>
-                <SheetContent className="space-y-4 opacity-50">
+                <SheetContent className="space-y-4">
                     <SheetHeader>
                         <SheetTitle>Edit Transaction</SheetTitle>
 
