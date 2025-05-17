@@ -39,7 +39,7 @@ export const CategoryTooltip = ({ active, payload }: CategoryTooltipProps) => {
                         </p>
                     </div>
 
-                    <p className="text-sm text-right font-medium">
+                    <p className="text-sm text-black text-right font-medium">
                         {formatCurrency(value * -1)}
                     </p>
                 </div>

@@ -46,7 +46,7 @@ export const WelcomeMsg = () => {
             <h2 className="text-2xl lg:text-4xl text-white font-medium">
                 {getPageTitle()}
             </h2>
-            <p className="text-sm w-2/3 lg:text-base text-[#89B6FD]">
+            <p className="text-sm w-full md:w-2/3 lg:text-base text-[#89B6FD]">
                 {getPageMsg()}
             </p>
         </div>
