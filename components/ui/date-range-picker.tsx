@@ -19,21 +19,15 @@ import { CheckIcon, ChevronDownIcon, ChevronUpIcon } from 'lucide-react'
 
 export interface DateRangePickerProps {
     /** Click handler for applying the updates from DateRangePicker. */
-    onUpdate?: (values: { range: DateRange; rangeCompare?: DateRange }) => void
+    onUpdate?: (values: { range: DateRange }) => void
     /** Initial value for start date */
     initialDateFrom?: Date | string
     /** Initial value for end date */
     initialDateTo?: Date | string
-    /** Initial value for start date for compare */
-    initialCompareFrom?: Date | string
-    /** Initial value for end date for compare */
-    initialCompareTo?: Date | string
     /** Alignment of popover */
     align?: 'start' | 'center' | 'end'
     /** Option for locale */
     locale?: string
-    /** Option for showing compare feature */
-    showCompare?: boolean
 }
 
 const formatDate = (date: Date, locale: string = 'en-us'): string => {
@@ -81,17 +75,12 @@ const PRESETS: Preset[] = [
 ]
 
 /** The DateRangePicker component allows a user to select a range of dates */
-export const DateRangePicker: FC<DateRangePickerProps> & {
-    filePath: string
-} = ({
+export const DateRangePicker: FC<DateRangePickerProps> = ({
     initialDateFrom = new Date(new Date().setHours(0, 0, 0, 0)),
     initialDateTo,
-    initialCompareFrom,
-    initialCompareTo,
     onUpdate,
     align = 'end',
     locale = 'en-US',
-    showCompare = true,
 }): React.ReactElement => {
     const [isOpen, setIsOpen] = useState(false)
 
@@ -101,26 +90,18 @@ export const DateRangePicker: FC<DateRangePickerProps> & {
             ? getDateAdjustedForTimezone(initialDateTo)
             : getDateAdjustedForTimezone(initialDateFrom),
     })
-    const [rangeCompare, setRangeCompare] = useState<DateRange | undefined>(
-        initialCompareFrom
-            ? {
-                  from: new Date(
-                      new Date(initialCompareFrom).setHours(0, 0, 0, 0)
-                  ),
-                  to: initialCompareTo
-                      ? new Date(
-                            new Date(initialCompareTo).setHours(0, 0, 0, 0)
-                        )
-                      : new Date(
-                            new Date(initialCompareFrom).setHours(0, 0, 0, 0)
-                        ),
-              }
-            : undefined
-    )
 
-    // Refs to store the values of range and rangeCompare when the date picker is opened
+    // Keep range in sync with props when they change (e.g., URL changes)
+    useEffect(() => {
+        setRange({
+            from: getDateAdjustedForTimezone(initialDateFrom),
+            to: initialDateTo
+                ? getDateAdjustedForTimezone(initialDateTo)
+                : getDateAdjustedForTimezone(initialDateFrom),
+        })
+    }, [initialDateFrom, initialDateTo])
+
     const openedRangeRef = useRef<DateRange | undefined>(undefined)
-    const openedRangeCompareRef = useRef<DateRange | undefined>(undefined)
 
     const [selectedPreset, setSelectedPreset] = useState<string | undefined>(
         undefined
@@ -224,23 +205,6 @@ export const DateRangePicker: FC<DateRangePickerProps> & {
     const setPreset = (preset: string): void => {
         const range = getPresetRange(preset)
         setRange(range)
-        if (rangeCompare) {
-            const rangeCompare = {
-                from: new Date(
-                    range.from.getFullYear() - 1,
-                    range.from.getMonth(),
-                    range.from.getDate()
-                ),
-                to: range.to
-                    ? new Date(
-                          range.to.getFullYear() - 1,
-                          range.to.getMonth(),
-                          range.to.getDate()
-                      )
-                    : undefined,
-            }
-            setRangeCompare(rangeCompare)
-        }
     }
 
     const checkPreset = (): void => {
@@ -286,23 +250,6 @@ export const DateRangePicker: FC<DateRangePickerProps> & {
                   ? getDateAdjustedForTimezone(initialDateFrom)
                   : initialDateFrom,
         })
-        setRangeCompare(
-            initialCompareFrom
-                ? {
-                      from:
-                          typeof initialCompareFrom === 'string'
-                              ? getDateAdjustedForTimezone(initialCompareFrom)
-                              : initialCompareFrom,
-                      to: initialCompareTo
-                          ? typeof initialCompareTo === 'string'
-                              ? getDateAdjustedForTimezone(initialCompareTo)
-                              : initialCompareTo
-                          : typeof initialCompareFrom === 'string'
-                            ? getDateAdjustedForTimezone(initialCompareFrom)
-                            : initialCompareFrom,
-                  }
-                : undefined
-        )
     }
 
     useEffect(() => {
@@ -348,7 +295,6 @@ export const DateRangePicker: FC<DateRangePickerProps> & {
     useEffect(() => {
         if (isOpen) {
             openedRangeRef.current = range
-            openedRangeCompareRef.current = rangeCompare
         }
     }, [isOpen])
 
@@ -377,16 +323,6 @@ export const DateRangePicker: FC<DateRangePickerProps> & {
                                     : ''
                             }`}</div>
                         </div>
-                        {rangeCompare != null && (
-                            <div className="opacity-60 text-xs -mt-1">
-                                <>
-                                    vs. {formatDate(rangeCompare.from, locale)}
-                                    {rangeCompare.to != null
-                                        ? ` - ${formatDate(rangeCompare.to, locale)}`
-                                        : ''}
-                                </>
-                            </div>
-                        )}
                     </div>
                     <div>
                         {isOpen ? (
@@ -401,95 +337,44 @@ export const DateRangePicker: FC<DateRangePickerProps> & {
                 <div className="flex">
                     <div className="flex">
                         <div className="flex flex-col">
-                            <div className="flex flex-col lg:flex-row gap-2 px-3 justify-end items-center lg:items-start pb-4 lg:pb-0">
-                                <div className="flex flex-col gap-2">
-                                    <div className="flex gap-2">
-                                        <DateInput
-                                            value={range.from}
-                                            onChange={(date) => {
-                                                const toDate =
-                                                    range.to == null ||
-                                                    date > range.to
-                                                        ? date
-                                                        : range.to
-                                                setRange((prevRange) => ({
-                                                    ...prevRange,
-                                                    from: date,
-                                                    to: toDate,
-                                                }))
-                                            }}
-                                        />
-                                        <div className="py-1">-</div>
-                                        <DateInput
-                                            value={range.to}
-                                            onChange={(date) => {
-                                                const fromDate =
-                                                    date < range.from
-                                                        ? date
-                                                        : range.from
-                                                setRange((prevRange) => ({
-                                                    ...prevRange,
-                                                    from: fromDate,
-                                                    to: date,
-                                                }))
-                                            }}
-                                        />
-                                    </div>
-                                    {rangeCompare != null && (
+                            {!isSmallScreen && (
+                                <div className="flex flex-row gap-2 px-3 justify-center items-start pb-2">
+                                    <div className="flex flex-col gap-2">
                                         <div className="flex gap-2">
                                             <DateInput
-                                                value={rangeCompare?.from}
+                                                value={range.from}
                                                 onChange={(date) => {
-                                                    if (rangeCompare) {
-                                                        const compareToDate =
-                                                            rangeCompare.to ==
-                                                                null ||
-                                                            date >
-                                                                rangeCompare.to
-                                                                ? date
-                                                                : rangeCompare.to
-                                                        setRangeCompare(
-                                                            (
-                                                                prevRangeCompare
-                                                            ) => ({
-                                                                ...prevRangeCompare,
-                                                                from: date,
-                                                                to: compareToDate,
-                                                            })
-                                                        )
-                                                    } else {
-                                                        setRangeCompare({
-                                                            from: date,
-                                                            to: new Date(),
-                                                        })
-                                                    }
+                                                    const toDate =
+                                                        range.to == null ||
+                                                        date > range.to
+                                                            ? date
+                                                            : range.to
+                                                    setRange((prevRange) => ({
+                                                        ...prevRange,
+                                                        from: date,
+                                                        to: toDate,
+                                                    }))
                                                 }}
                                             />
                                             <div className="py-1">-</div>
                                             <DateInput
-                                                value={rangeCompare?.to}
+                                                value={range.to}
                                                 onChange={(date) => {
-                                                    if (
-                                                        rangeCompare &&
-                                                        rangeCompare.from
-                                                    ) {
-                                                        const compareFromDate =
-                                                            date <
-                                                            rangeCompare.from
-                                                                ? date
-                                                                : rangeCompare.from
-                                                        setRangeCompare({
-                                                            ...rangeCompare,
-                                                            from: compareFromDate,
-                                                            to: date,
-                                                        })
-                                                    }
+                                                    const fromDate =
+                                                        date < range.from
+                                                            ? date
+                                                            : range.from
+                                                    setRange((prevRange) => ({
+                                                        ...prevRange,
+                                                        from: fromDate,
+                                                        to: date,
+                                                    }))
                                                 }}
                                             />
                                         </div>
-                                    )}
+                                    </div>
                                 </div>
-                            </div>
+                            )}
                             {isSmallScreen && (
                                 <Select
                                     defaultValue={selectedPreset}
@@ -572,16 +457,9 @@ export const DateRangePicker: FC<DateRangePickerProps> & {
                         onClick={() => {
                             setIsOpen(false)
                             if (
-                                !areRangesEqual(
-                                    range,
-                                    openedRangeRef.current
-                                ) ||
-                                !areRangesEqual(
-                                    rangeCompare,
-                                    openedRangeCompareRef.current
-                                )
+                                !areRangesEqual(range, openedRangeRef.current)
                             ) {
-                                onUpdate?.({ range, rangeCompare })
+                                onUpdate?.({ range })
                             }
                         }}
                     >
@@ -594,5 +472,3 @@ export const DateRangePicker: FC<DateRangePickerProps> & {
 }
 
 DateRangePicker.displayName = 'DateRangePicker'
-DateRangePicker.filePath =
-    'libs/shared/ui-kit/src/lib/date-range-picker/date-range-picker.tsx'

@@ -46,7 +46,6 @@ export const DateFilter = () => {
             initialDateTo={to ? new Date(to) : defaultTo}
             onUpdate={handleUpdate}
             align="start"
-            showCompare={false}
         />
     )
 }
