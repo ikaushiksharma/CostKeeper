@@ -134,6 +134,7 @@ const TransactionsPage = () => {
                             deleteTransactions.mutate({ ids })
                         }}
                         disabled={isDisabled}
+                        amountKey="amount"
                     />
                 </CardContent>
             </Card>

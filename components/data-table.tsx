@@ -26,6 +26,7 @@ import {
     TableRow,
 } from '@/components/ui/table'
 import { useConfirm } from '@/hooks/use-confirm'
+import { formatCurrency } from '@/lib/utils'
 
 interface DataTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[]
@@ -33,6 +34,7 @@ interface DataTableProps<TData, TValue> {
     filterKey: string
     onDelete: (rows: Row<TData>[]) => void
     disabled?: boolean
+    amountKey?: keyof TData
 }
 
 export function DataTable<TData, TValue>({
@@ -41,6 +43,7 @@ export function DataTable<TData, TValue>({
     filterKey,
     onDelete,
     disabled,
+    amountKey,
 }: DataTableProps<TData, TValue>) {
     const [ConfirmDialog, confirm] = useConfirm(
         'Are you sure?',
@@ -67,6 +70,14 @@ export function DataTable<TData, TValue>({
             rowSelection,
         },
     })
+
+    const total = React.useMemo(() => {
+        if (!amountKey) return null
+        return table.getFilteredSelectedRowModel().rows.reduce((sum, row) => {
+            const amount = row.original[amountKey]
+            return sum + (typeof amount === 'number' ? amount : 0)
+        }, 0)
+    }, [table.getFilteredSelectedRowModel().rows, amountKey])
 
     return (
         <div>
@@ -167,6 +178,11 @@ export function DataTable<TData, TValue>({
                 <div className="flex-1 text-sm text-muted-foreground">
                     {table.getFilteredSelectedRowModel().rows.length} of{' '}
                     {table.getFilteredRowModel().rows.length} row(s) selected.
+                    {!!total && (
+                        <span className="ml-2">
+                            Total: {formatCurrency(total)}
+                        </span>
+                    )}
                 </div>
 
                 <Button
