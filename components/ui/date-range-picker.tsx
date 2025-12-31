@@ -6,7 +6,6 @@ import { Button } from './button'
 import { Popover, PopoverContent, PopoverTrigger } from './popover'
 import { Calendar } from './calendar'
 import { DateInput } from './date-input'
-import { Label } from './label'
 import {
     Select,
     SelectContent,
@@ -16,6 +15,18 @@ import {
 } from './select'
 import { cn } from '@/lib/utils'
 import { CheckIcon, ChevronDownIcon, ChevronUpIcon } from 'lucide-react'
+import {
+    startOfDay,
+    endOfDay,
+    subDays,
+    startOfMonth,
+    endOfMonth,
+    subMonths,
+    addMonths,
+    startOfYear,
+    endOfYear,
+    subYears,
+} from 'date-fns'
 
 export interface DateRangePickerProps {
     /** Click handler for applying the updates from DateRangePicker. */
@@ -127,79 +138,55 @@ export const DateRangePicker: FC<DateRangePickerProps> = ({
     const getPresetRange = (presetName: string): DateRange => {
         const preset = PRESETS.find(({ name }) => name === presetName)
         if (!preset) throw new Error(`Unknown date range preset: ${presetName}`)
-        const from = new Date()
-        const to = new Date()
-        const first = from.getDate() - from.getDay()
+        const today = new Date()
 
         switch (preset.name) {
             case 'today':
-                from.setHours(0, 0, 0, 0)
-                to.setHours(23, 59, 59, 999)
-                break
-            case 'yesterday':
-                from.setDate(from.getDate() - 1)
-                from.setHours(0, 0, 0, 0)
-                to.setDate(to.getDate() - 1)
-                to.setHours(23, 59, 59, 999)
-                break
+                return { from: startOfDay(today), to: endOfDay(today) }
+            case 'yesterday': {
+                const yesterday = subDays(today, 1)
+                return { from: startOfDay(yesterday), to: endOfDay(yesterday) }
+            }
             case 'last7':
-                from.setDate(from.getDate() - 6)
-                from.setHours(0, 0, 0, 0)
-                to.setHours(23, 59, 59, 999)
-                break
+                return {
+                    from: startOfDay(subDays(today, 6)),
+                    to: endOfDay(today),
+                }
             case 'last14':
-                from.setDate(from.getDate() - 13)
-                from.setHours(0, 0, 0, 0)
-                to.setHours(23, 59, 59, 999)
-                break
+                return {
+                    from: startOfDay(subDays(today, 13)),
+                    to: endOfDay(today),
+                }
             case 'last30':
-                from.setDate(from.getDate() - 29)
-                from.setHours(0, 0, 0, 0)
-                to.setHours(23, 59, 59, 999)
-                break
-
-            case 'nextMonth':
-                from.setMonth(from.getMonth() + 1)
-                from.setDate(1)
-                from.setHours(0, 0, 0, 0)
-                to.setMonth(to.getMonth() + 2)
-                to.setDate(0)
-                to.setHours(23, 59, 59, 999)
-                break
+                return {
+                    from: startOfDay(subDays(today, 29)),
+                    to: endOfDay(today),
+                }
             case 'thisMonth':
-                from.setDate(1)
-                from.setHours(0, 0, 0, 0)
-                to.setHours(23, 59, 59, 999)
-                break
-            case 'lastMonth':
-                from.setMonth(from.getMonth() - 1)
-                from.setDate(1)
-                from.setHours(0, 0, 0, 0)
-                to.setDate(0)
-                to.setHours(23, 59, 59, 999)
-                break
+                return { from: startOfMonth(today), to: endOfDay(today) }
+            case 'lastMonth': {
+                const lastMonth = subMonths(today, 1)
+                return {
+                    from: startOfMonth(lastMonth),
+                    to: endOfMonth(lastMonth),
+                }
+            }
+            case 'nextMonth': {
+                const nextMonth = addMonths(today, 1)
+                return {
+                    from: startOfMonth(nextMonth),
+                    to: endOfMonth(nextMonth),
+                }
+            }
             case 'thisYear':
-                from.setMonth(0)
-                from.setDate(1)
-                from.setHours(0, 0, 0, 0)
-                to.setHours(23, 59, 59, 999)
-                break
-            case 'lastYear':
-                from.setFullYear(from.getFullYear() - 1)
-                from.setMonth(0)
-                from.setDate(1)
-                from.setHours(0, 0, 0, 0)
-                to.setFullYear(to.getFullYear() - 1)
-                to.setMonth(11)
-                to.setDate(31)
-                to.setHours(23, 59, 59, 999)
-                break
-                to.setDate(0)
-                to.setHours(23, 59, 59, 999)
-                break
+                return { from: startOfYear(today), to: endOfDay(today) }
+            case 'lastYear': {
+                const lastYear = subYears(today, 1)
+                return { from: startOfYear(lastYear), to: endOfYear(lastYear) }
+            }
+            default:
+                return { from: startOfDay(today), to: endOfDay(today) }
         }
-
-        return { from, to }
     }
 
     const setPreset = (preset: string): void => {
