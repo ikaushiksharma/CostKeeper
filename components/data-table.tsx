@@ -8,11 +8,11 @@ import {
     flexRender,
     getCoreRowModel,
     getFilteredRowModel,
-    getPaginationRowModel,
     getSortedRowModel,
     useReactTable,
 } from '@tanstack/react-table'
-import { Trash } from 'lucide-react'
+import { useVirtualizer } from '@tanstack/react-virtual'
+import { Loader2, Trash } from 'lucide-react'
 import * as React from 'react'
 
 import { Button } from '@/components/ui/button'
@@ -35,6 +35,9 @@ interface DataTableProps<TData, TValue> {
     onDelete: (rows: Row<TData>[]) => void
     disabled?: boolean
     amountKey?: keyof TData
+    fetchNextPage?: () => void
+    hasNextPage?: boolean
+    isFetchingNextPage?: boolean
 }
 
 export function DataTable<TData, TValue>({
@@ -44,6 +47,9 @@ export function DataTable<TData, TValue>({
     onDelete,
     disabled,
     amountKey,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
 }: DataTableProps<TData, TValue>) {
     const [ConfirmDialog, confirm] = useConfirm(
         'Are you sure?',
@@ -58,7 +64,6 @@ export function DataTable<TData, TValue>({
         data,
         columns,
         getCoreRowModel: getCoreRowModel(),
-        getPaginationRowModel: getPaginationRowModel(),
         onSortingChange: setSorting,
         getSortedRowModel: getSortedRowModel(),
         getFilteredRowModel: getFilteredRowModel(),
@@ -70,6 +75,48 @@ export function DataTable<TData, TValue>({
             rowSelection,
         },
     })
+
+    const { rows } = table.getRowModel()
+
+    const tableContainerRef = React.useRef<HTMLDivElement>(null)
+
+    const rowVirtualizer = useVirtualizer({
+        count: hasNextPage ? rows.length + 1 : rows.length,
+        getScrollElement: () => tableContainerRef.current,
+        estimateSize: () => 50,
+        overscan: 10,
+        measureElement:
+            typeof window !== 'undefined' &&
+            navigator.userAgent.indexOf('Firefox') === -1
+                ? (element) => element?.getBoundingClientRect().height
+                : undefined,
+    })
+
+    const virtualItems = rowVirtualizer.getVirtualItems()
+
+    // Infinite scroll trigger
+    const lastItemIndex = virtualItems[virtualItems.length - 1]?.index ?? -1
+
+    React.useEffect(() => {
+        if (lastItemIndex === -1) {
+            return
+        }
+
+        if (
+            lastItemIndex >= rows.length - 1 &&
+            hasNextPage &&
+            !isFetchingNextPage &&
+            fetchNextPage
+        ) {
+            fetchNextPage()
+        }
+    }, [
+        hasNextPage,
+        fetchNextPage,
+        rows.length,
+        isFetchingNextPage,
+        lastItemIndex,
+    ])
 
     const total = React.useMemo(() => {
         if (!amountKey) return null
@@ -121,14 +168,20 @@ export function DataTable<TData, TValue>({
                     </Button>
                 )}
             </div>
-            <div className="rounded-md border">
-                <Table>
-                    <TableHeader>
+            <div
+                ref={tableContainerRef}
+                className="rounded-md border h-[50vh] overflow-auto relative"
+            >
+                <Table className="min-w-full">
+                    <TableHeader className="sticky top-0 z-10 bg-background">
                         {table.getHeaderGroups().map((headerGroup) => (
                             <TableRow key={headerGroup.id}>
                                 {headerGroup.headers.map((header) => {
                                     return (
-                                        <TableHead key={header.id}>
+                                        <TableHead
+                                            key={header.id}
+                                            className="whitespace-nowrap px-4 py-2"
+                                        >
                                             {header.isPlaceholder
                                                 ? null
                                                 : flexRender(
@@ -143,24 +196,96 @@ export function DataTable<TData, TValue>({
                         ))}
                     </TableHeader>
                     <TableBody>
-                        {table.getRowModel().rows?.length ? (
-                            table.getRowModel().rows.map((row) => (
-                                <TableRow
-                                    key={row.id}
-                                    data-state={
-                                        row.getIsSelected() && 'selected'
+                        {virtualItems.length ? (
+                            <>
+                                {/* Top padding row for virtualization */}
+                                {virtualItems[0]?.start > 0 && (
+                                    <TableRow>
+                                        <TableCell
+                                            colSpan={columns.length}
+                                            style={{
+                                                height: virtualItems[0]?.start,
+                                                padding: 0,
+                                            }}
+                                        />
+                                    </TableRow>
+                                )}
+                                {virtualItems.map((virtualRow) => {
+                                    const isLoaderRow =
+                                        virtualRow.index > rows.length - 1
+                                    const row = rows[virtualRow.index]
+
+                                    if (isLoaderRow) {
+                                        return (
+                                            <TableRow
+                                                key="loader"
+                                                data-index={virtualRow.index}
+                                                ref={
+                                                    rowVirtualizer.measureElement
+                                                }
+                                            >
+                                                <TableCell
+                                                    colSpan={columns.length}
+                                                    className="h-12 text-center whitespace-nowrap px-4 py-2"
+                                                >
+                                                    {hasNextPage ? (
+                                                        <div className="flex items-center justify-center gap-2">
+                                                            <Loader2 className="size-4 animate-spin" />
+                                                            Loading more...
+                                                        </div>
+                                                    ) : (
+                                                        'No more data'
+                                                    )}
+                                                </TableCell>
+                                            </TableRow>
+                                        )
                                     }
-                                >
-                                    {row.getVisibleCells().map((cell) => (
-                                        <TableCell key={cell.id}>
-                                            {flexRender(
-                                                cell.column.columnDef.cell,
-                                                cell.getContext()
-                                            )}
-                                        </TableCell>
-                                    ))}
-                                </TableRow>
-                            ))
+
+                                    return (
+                                        <TableRow
+                                            key={row.id}
+                                            data-index={virtualRow.index}
+                                            ref={rowVirtualizer.measureElement}
+                                            data-state={
+                                                row.getIsSelected() &&
+                                                'selected'
+                                            }
+                                        >
+                                            {row
+                                                .getVisibleCells()
+                                                .map((cell) => (
+                                                    <TableCell
+                                                        key={cell.id}
+                                                        className="whitespace-nowrap px-4 py-2"
+                                                    >
+                                                        {flexRender(
+                                                            cell.column
+                                                                .columnDef.cell,
+                                                            cell.getContext()
+                                                        )}
+                                                    </TableCell>
+                                                ))}
+                                        </TableRow>
+                                    )
+                                })}
+                                {/* Bottom padding row for virtualization */}
+                                {virtualItems[virtualItems.length - 1]?.end <
+                                    rowVirtualizer.getTotalSize() && (
+                                    <TableRow>
+                                        <TableCell
+                                            colSpan={columns.length}
+                                            style={{
+                                                height:
+                                                    rowVirtualizer.getTotalSize() -
+                                                    virtualItems[
+                                                        virtualItems.length - 1
+                                                    ]?.end,
+                                                padding: 0,
+                                            }}
+                                        />
+                                    </TableRow>
+                                )}
+                            </>
                         ) : (
                             <TableRow>
                                 <TableCell
@@ -174,7 +299,7 @@ export function DataTable<TData, TValue>({
                     </TableBody>
                 </Table>
             </div>
-            <div className="flex items-center justify-end space-x-2 py-4">
+            <div className="flex items-center justify-between py-4">
                 <div className="flex-1 text-sm text-muted-foreground">
                     {table.getFilteredSelectedRowModel().rows.length} of{' '}
                     {table.getFilteredRowModel().rows.length} row(s) selected.
@@ -184,23 +309,12 @@ export function DataTable<TData, TValue>({
                         </span>
                     )}
                 </div>
-
-                <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => table.previousPage()}
-                    disabled={!table.getCanPreviousPage()}
-                >
-                    Previous
-                </Button>
-                <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => table.nextPage()}
-                    disabled={!table.getCanNextPage()}
-                >
-                    Next
-                </Button>
+                {isFetchingNextPage && (
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Loader2 className="size-4 animate-spin" />
+                        Loading more...
+                    </div>
+                )}
             </div>
         </div>
     )

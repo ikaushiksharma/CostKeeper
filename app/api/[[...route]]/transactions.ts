@@ -14,6 +14,8 @@ import {
     transactions,
 } from '@/db/schema'
 
+const DEFAULT_PAGE_SIZE = 20
+
 const app = new Hono()
     .get(
         '/',
@@ -23,12 +25,15 @@ const app = new Hono()
                 from: z.string().optional(),
                 to: z.string().optional(),
                 accountId: z.string().optional(),
+                limit: z.string().optional(),
+                offset: z.string().optional(),
             })
         ),
         clerkMiddleware(),
         async (ctx) => {
             const auth = getAuth(ctx)
-            const { from, to, accountId } = ctx.req.valid('query')
+            const { from, to, accountId, limit, offset } =
+                ctx.req.valid('query')
 
             if (!auth?.userId) {
                 return ctx.json({ error: 'Unauthorized.' }, 401)
@@ -41,6 +46,9 @@ const app = new Hono()
                 ? parse(from, 'yyyy-MM-dd', new Date())
                 : defaultFrom
             const endDate = to ? parse(to, 'yyyy-MM-dd', new Date()) : defaultTo
+
+            const pageSize = limit ? parseInt(limit, 10) : DEFAULT_PAGE_SIZE
+            const pageOffset = offset ? parseInt(offset, 10) : 0
 
             const data = await db
                 .select({
@@ -71,8 +79,17 @@ const app = new Hono()
                     )
                 )
                 .orderBy(desc(transactions.date))
+                .limit(pageSize + 1) // Fetch one extra to check if there are more
+                .offset(pageOffset)
 
-            return ctx.json({ data })
+            const hasMore = data.length > pageSize
+            const resultData = hasMore ? data.slice(0, pageSize) : data
+
+            return ctx.json({
+                data: resultData,
+                nextOffset: hasMore ? pageOffset + pageSize : null,
+                hasMore,
+            })
         }
     )
     .get(
