@@ -1,7 +1,7 @@
 'use client'
 
 import { Loader2, Plus } from 'lucide-react'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { toast } from 'sonner'
 import { DataTable } from '@/components/data-table'
 import { Button } from '@/components/ui/button'
@@ -37,7 +37,10 @@ const TransactionsPage = () => {
     const createTransactions = useBulkCreateTransactions()
     const deleteTransactions = useBulkDeleteTransactions()
     const transactionsQuery = useGetTransactions()
-    const transactions = transactionsQuery.data || []
+
+    const transactions = useMemo(() => {
+        return transactionsQuery.data?.pages.flatMap((page) => page.data) || []
+    }, [transactionsQuery.data])
 
     const onUpload = (results: typeof INITIAL_IMPORT_RESULTS) => {
         setImportResults(results)
@@ -135,6 +138,11 @@ const TransactionsPage = () => {
                         }}
                         disabled={isDisabled}
                         amountKey="amount"
+                        fetchNextPage={transactionsQuery.fetchNextPage}
+                        hasNextPage={transactionsQuery.hasNextPage}
+                        isFetchingNextPage={
+                            transactionsQuery.isFetchingNextPage
+                        }
                     />
                 </CardContent>
             </Card>
