@@ -9,7 +9,7 @@ import {
     CardTitle,
 } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
-import { cn, formatCurrency } from '@/lib/utils'
+import { cn, formatCurrency, formatPercentage } from '@/lib/utils'
 
 import { CountUp } from './count-up'
 
@@ -50,13 +50,13 @@ type DataCardProps = BoxVariants &
         title: string
         value?: number
         dateRange: string
-        // percentageChange?: number
+        percentageChange?: number
     }
 
 export const DataCard = ({
     title,
     value = 0,
-    // percentageChange = 0,
+    percentageChange = 0,
     icon: Icon,
     variant,
     dateRange,
@@ -90,16 +90,16 @@ export const DataCard = ({
                     />
                 </h1>
 
-                {/* <p
+                <p
                     className={cn(
                         'text-muted-foreground text-sm line-clamp-1',
                         percentageChange > 0 && 'text-emerald-500',
                         percentageChange < 0 && 'text-rose-500'
                     )}
                 >
-                    {formatPercentage(percentageChange, { addPrefix: true })}{' '}
-                    from last period.
-                </p> */}
+                    {formatPercentage(percentageChange, { addPrefix: true })} of
+                    income
+                </p>
             </CardContent>
         </Card>
     )

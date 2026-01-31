@@ -24,15 +24,27 @@ export const useGetSummary = () => {
             if (!response.ok) throw new Error('Failed to fetch summary.')
 
             const { data } = await response.json()
+            const incomeAmount = convertAmountFromMilliunits(data.incomeAmount)
+            const expensesAmount = convertAmountFromMilliunits(
+                data.expensesAmount
+            )
+            const remainingAmount = convertAmountFromMilliunits(
+                data.remainingAmount
+            )
+
+            // Calculate percentages based on income
+            const remainingPercentage =
+                incomeAmount === 0 ? 0 : (remainingAmount / incomeAmount) * 100
+            const expensePercentage =
+                incomeAmount === 0 ? 0 : (expensesAmount / incomeAmount) * 100
+
             return {
                 ...data,
-                incomeAmount: convertAmountFromMilliunits(data.incomeAmount),
-                expensesAmount: convertAmountFromMilliunits(
-                    data.expensesAmount
-                ),
-                remainingAmount: convertAmountFromMilliunits(
-                    data.remainingAmount
-                ),
+                incomeAmount,
+                expensesAmount,
+                remainingAmount,
+                remainingPercentage,
+                expensePercentage,
                 categories: data.categories.map((category) => ({
                     ...category,
                     value: convertAmountFromMilliunits(category.value),
