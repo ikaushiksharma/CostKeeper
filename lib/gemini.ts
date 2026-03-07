@@ -16,7 +16,7 @@ export async function parseTransactionMessage(
     existingCategories: string[],
     existingAccounts: string[] = []
 ): Promise<ParsedTransaction | null> {
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' })
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' })
 
     const prompt = `You are a transaction parser for an expense tracker app. Parse the following message and extract transaction details.
 
