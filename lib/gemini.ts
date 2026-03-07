@@ -18,27 +18,38 @@ export async function parseTransactionMessage(
 ): Promise<ParsedTransaction | null> {
     const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' })
 
+    // Get today's date in Indian timezone (IST, UTC+5:30)
+    const todayISO = new Date().toLocaleDateString('en-CA', {
+        timeZone: 'Asia/Kolkata',
+    }) // YYYY-MM-DD format
+
     const prompt = `You are a transaction parser for an expense tracker app. Parse the following message and extract transaction details.
 
 User message: "${message}"
+
+Today's date is: ${todayISO} (Indian Standard Time)
 
 Available categories: ${existingCategories.length > 0 ? existingCategories.join(', ') : 'None specified'}
 Available accounts: ${existingAccounts.length > 0 ? existingAccounts.join(', ') : 'None specified'}
 
 Rules:
-1. Amount should be in cents (multiply by 100). Expenses should be NEGATIVE, income should be POSITIVE.
-2. If no date is mentioned, use today's date. Support various date formats like "2024-03-15", "March 15", "yesterday", "last week", etc.
-3. Try to match a category from the available categories, or suggest a new one.
-4. Try to match an account from the available accounts if mentioned (look for patterns like "from X account", "in X", "account X").
-5. Extract the payee/merchant if mentioned.
-6. Any additional context goes in notes.
+1. Amount MUST be in cents. Convert the amount to cents by multiplying by 100. 
+   - Example: 40 rupees = 4000 cents, 5.50 = 550 cents, 100 = 10000 cents
+   - Expenses should be NEGATIVE (e.g., -4000 for spending 40)
+   - Income should be POSITIVE (e.g., +10000 for receiving 100)
+2. If no date is mentioned, use today's date: ${todayISO}
+3. Support various date formats like "2026-03-15", "March 15", "yesterday", "last week", etc. Always resolve to an actual date.
+4. Try to match a category from the available categories, or suggest a new one.
+5. Try to match an account from the available accounts if mentioned (look for patterns like "from X account", "in X", "account X").
+6. Extract the payee/merchant if mentioned.
+7. Any additional context goes in notes.
 
 Respond ONLY with valid JSON in this exact format (no markdown, no explanation):
 {
-    "amount": <number in cents, negative for expenses>,
+    "amount": <number in cents, negative for expenses, e.g., -4000 for 40 rupees spent>,
     "payee": "<string or null>",
     "notes": "<string or null>",
-    "date": "<ISO date string>",
+    "date": "<ISO date string, e.g., ${todayISO}>",
     "categoryHint": "<string or null>",
     "accountHint": "<string or null>"
 }
@@ -68,34 +79,13 @@ If you cannot parse a valid transaction from the message, respond with: null`
             amount: parsed.amount,
             payee: parsed.payee || parsed.categoryHint,
             notes: parsed.notes || null,
-            date: new Date(parsed.date),
+            // Parse date and set to noon IST to avoid timezone boundary issues
+            date: new Date(`${parsed.date}T12:00:00+05:30`),
             categoryHint: parsed.categoryHint || null,
             accountHint: parsed.accountHint || null,
         }
     } catch (error) {
         console.error('Error parsing transaction with Gemini:', error)
         return null
-    }
-}
-
-export async function generateBotResponse(
-    context: string,
-    userMessage: string
-): Promise<string> {
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' })
-
-    const prompt = `You are a helpful expense tracker bot assistant. Keep responses brief and friendly.
-
-Context: ${context}
-User message: "${userMessage}"
-
-Provide a short, helpful response.`
-
-    try {
-        const result = await model.generateContent(prompt)
-        return result.response.text().trim()
-    } catch (error) {
-        console.error('Error generating bot response:', error)
-        return "I'm having trouble processing that right now. Please try again."
     }
 }

@@ -29,11 +29,11 @@ I help you track expenses right from Telegram\\!
 
 *Add transactions:*
 Just send me a message like:
-• "Spent $50 on groceries"
-• "Coffee $5\\.50 from Cash account"
-• "Groceries $30 category Food"
-• "Dinner $25 from Bank account category Restaurant"
-• "Electricity $100 on 2024\\-03\\-15"
+• "Spent 50 on groceries"
+• "Coffee 5\\.50 from Cash account"
+• "Groceries 30 category Food"
+• "Dinner 25 from Bank account category Restaurant"
+• "Electricity 100 on 2024\\-03\\-15"
 
 You can specify account, category, and date\\!
 I'll use your defaults if not specified\\.`
@@ -622,7 +622,7 @@ async function handleTransactionMessage(
                 `📁 Account: ${accountName}\n` +
                 `🏷️ Category: ${categoryName}\n` +
                 (parsed.payee ? `🏪 Payee: ${parsed.payee}\n` : '') +
-                `📅 Date: ${parsed.date.toLocaleDateString()}`
+                `📅 Date: ${parsed.date.toLocaleDateString('en-IN', { timeZone: 'Asia/Kolkata' })}`
         )
     } catch (error) {
         console.error('Error creating transaction:', error)
