@@ -42,7 +42,7 @@ Rules:
 3. Support various date formats like "2026-03-15", "March 15", "yesterday", "last week", etc. Always resolve to an actual date.
 4. Try to match a category from the available categories, or suggest a new one.
 5. Try to match an account from the available accounts if mentioned (look for patterns like "from X account", "in X", "account X").
-6. Extract the payee/merchant if mentioned.
+6. Extract the payee/merchant/payment for if mentioned.
 7. Any additional context goes in notes.
 
 Respond ONLY with valid JSON in this exact format (no markdown, no explanation):

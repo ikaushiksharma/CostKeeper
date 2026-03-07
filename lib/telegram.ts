@@ -1,3 +1,5 @@
+import { convertAmountFromMilliunits } from './utils'
+
 const TELEGRAM_API_URL = `https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}`
 
 interface TelegramMessage {
@@ -124,9 +126,9 @@ export async function deleteWebhook(): Promise<boolean> {
     }
 }
 
-export function formatAmount(amountInCents: number): string {
-    const amount = Math.abs(amountInCents / 100)
-    const sign = amountInCents < 0 ? '-' : '+'
+export function formatAmount(amountInMillis: number): string {
+    const amount = convertAmountFromMilliunits(amountInMillis)
+    const sign = amountInMillis < 0 ? '-' : '+'
     return `${sign}Rs. ${amount.toFixed(2)}`
 }
 

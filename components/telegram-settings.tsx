@@ -144,15 +144,15 @@ export function TelegramSettings() {
                     </h4>
                     <div className="text-sm text-muted-foreground space-y-1">
                         <p>
-                            &quot;Spent $50 on groceries&quot; → Adds $50
+                            &quot;Spent 50 on groceries&quot; → Adds Rs 50
                             expense
                         </p>
                         <p>
-                            &quot;Coffee at Starbucks $5.50&quot; → Adds $5.50
-                            expense with payee
+                            &quot;Coffee at Starbucks 5.50&quot; → Adds Rs 5.50
+                            expense for payee
                         </p>
                         <p>
-                            &quot;Received $1000 salary&quot; → Adds $1000
+                            &quot;Received 1000 salary&quot; → Adds Rs 1000
                             income
                         </p>
                     </div>
