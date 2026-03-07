@@ -155,11 +155,28 @@ const app = new Hono()
             if (!auth?.userId) {
                 return ctx.json({ error: 'Unauthorized.' }, 401)
             }
+
+            // Get category name if categoryId is provided
+            let categoryName: string | null = null
+            if (values.categoryId) {
+                const [category] = await db
+                    .select({ name: categories.name })
+                    .from(categories)
+                    .where(eq(categories.id, values.categoryId))
+                if (category) {
+                    categoryName = category.name
+                }
+            }
+
+            // If payee is null, use category name instead
+            const payee = values.payee || categoryName
+
             const [data] = await db
                 .insert(transactions)
                 .values({
                     id: createId(),
                     ...values,
+                    payee,
                 })
                 .returning()
 

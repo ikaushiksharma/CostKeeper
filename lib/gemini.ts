@@ -66,7 +66,7 @@ If you cannot parse a valid transaction from the message, respond with: null`
 
         return {
             amount: parsed.amount,
-            payee: parsed.payee || null,
+            payee: parsed.payee || parsed.categoryHint,
             notes: parsed.notes || null,
             date: new Date(parsed.date),
             categoryHint: parsed.categoryHint || null,

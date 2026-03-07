@@ -600,7 +600,7 @@ async function handleTransactionMessage(
             .values({
                 id: createId(),
                 amount: parsed.amount,
-                payee: parsed.payee,
+                payee: `${parsed.payee || parsed.categoryHint} (via TG)`,
                 notes: parsed.notes
                     ? `${parsed.notes} (via Telegram)`
                     : 'Added via Telegram',
