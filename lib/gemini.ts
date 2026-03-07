@@ -1,4 +1,5 @@
 import { GoogleGenerativeAI } from '@google/generative-ai'
+import { convertAmountToMilliunits } from './utils'
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '')
 
@@ -33,10 +34,10 @@ Available categories: ${existingCategories.length > 0 ? existingCategories.join(
 Available accounts: ${existingAccounts.length > 0 ? existingAccounts.join(', ') : 'None specified'}
 
 Rules:
-1. Amount MUST be in cents. Convert the amount to cents by multiplying by 100. 
-   - Example: 40 rupees = 4000 cents, 5.50 = 550 cents, 100 = 10000 cents
-   - Expenses should be NEGATIVE (e.g., -4000 for spending 40)
-   - Income should be POSITIVE (e.g., +10000 for receiving 100)
+1. Amount MUST be in decimal
+   - Example: 40 rupees = 40.00, 5.50 rupees = 5.50
+   - Expenses should be NEGATIVE (e.g., -40.00 for spending 40)
+   - Income should be POSITIVE (e.g., +100.00 for receiving 100)
 2. If no date is mentioned, use today's date: ${todayISO}
 3. Support various date formats like "2026-03-15", "March 15", "yesterday", "last week", etc. Always resolve to an actual date.
 4. Try to match a category from the available categories, or suggest a new one.
@@ -46,7 +47,7 @@ Rules:
 
 Respond ONLY with valid JSON in this exact format (no markdown, no explanation):
 {
-    "amount": <number in cents, negative for expenses, e.g., -4000 for 40 rupees spent>,
+    "amount": <number in decimal, negative for expenses, e.g., -40.00 for 40 rupees spent>,
     "payee": "<string or null>",
     "notes": "<string or null>",
     "date": "<ISO date string, e.g., ${todayISO}>",
@@ -76,7 +77,7 @@ If you cannot parse a valid transaction from the message, respond with: null`
         }
 
         return {
-            amount: parsed.amount,
+            amount: convertAmountToMilliunits(parsed.amount),
             payee: parsed.payee || parsed.categoryHint,
             notes: parsed.notes || null,
             // Parse date and set to noon IST to avoid timezone boundary issues
