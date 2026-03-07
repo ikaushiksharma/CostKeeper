@@ -16,9 +16,22 @@ interface TelegramMessage {
     date: number
 }
 
+interface TelegramCallbackQuery {
+    id: string
+    from: {
+        id: number
+        username?: string
+        first_name?: string
+        last_name?: string
+    }
+    message?: TelegramMessage
+    data?: string
+}
+
 interface TelegramUpdate {
     update_id: number
     message?: TelegramMessage
+    callback_query?: TelegramCallbackQuery
 }
 
 export interface TelegramUserInfo {
@@ -114,9 +127,38 @@ export async function deleteWebhook(): Promise<boolean> {
 export function formatAmount(amountInCents: number): string {
     const amount = Math.abs(amountInCents / 100)
     const sign = amountInCents < 0 ? '-' : '+'
-    return `${sign}$${amount.toFixed(2)}`
+    return `${sign}Rs. ${amount.toFixed(2)}`
 }
 
 export function escapeMarkdown(text: string): string {
     return text.replace(/[_*[\]()~`>#+\-=|{}.!]/g, '\\$&')
 }
+
+export async function answerCallbackQuery(
+    callbackQueryId: string,
+    options?: {
+        text?: string
+        showAlert?: boolean
+    }
+): Promise<boolean> {
+    try {
+        const response = await fetch(
+            `${TELEGRAM_API_URL}/answerCallbackQuery`,
+            {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    callback_query_id: callbackQueryId,
+                    text: options?.text,
+                    show_alert: options?.showAlert,
+                }),
+            }
+        )
+        return response.ok
+    } catch (error) {
+        console.error('Error answering callback query:', error)
+        return false
+    }
+}
+
+export type { TelegramCallbackQuery }

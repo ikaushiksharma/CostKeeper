@@ -5,11 +5,13 @@ import { db } from '@/db/drizzle'
 import { accounts, categories, telegramUsers, transactions } from '@/db/schema'
 import { parseTransactionMessage } from '@/lib/gemini'
 import {
+    answerCallbackQuery,
     formatAmount,
     parseUpdate,
     sendMessage,
     sendInlineKeyboard,
     setWebhook,
+    TelegramCallbackQuery,
 } from '@/lib/telegram'
 
 const HELP_MESSAGE = `🤑 *Cost Keeper Bot*
@@ -28,17 +30,25 @@ I help you track expenses right from Telegram\\!
 *Add transactions:*
 Just send me a message like:
 • "Spent $50 on groceries"
-• "Coffee at Starbucks $5\\.50"
-• "Received $1000 salary"
-• "Paid $200 for electricity bill"
+• "Coffee $5\\.50 from Cash account"
+• "Groceries $30 category Food"
+• "Dinner $25 from Bank account category Restaurant"
+• "Electricity $100 on 2024\\-03\\-15"
 
-I'll parse it and add it to your tracker\\!`
+You can specify account, category, and date\\!
+I'll use your defaults if not specified\\.`
 
 const app = new Hono()
     // Webhook endpoint for Telegram
     .post('/webhook', async (ctx) => {
         const body = await ctx.req.json()
         const update = parseUpdate(body)
+
+        // Handle callback queries (inline button presses)
+        if (update?.callback_query) {
+            await handleCallbackQuery(update.callback_query)
+            return ctx.json({ ok: true })
+        }
 
         if (!update?.message?.text) {
             return ctx.json({ ok: true })
@@ -346,6 +356,129 @@ async function handleSetDefaultsCommand(chatId: number, telegramId: string) {
     )
 }
 
+async function handleCallbackQuery(callbackQuery: TelegramCallbackQuery) {
+    const { id: queryId, from, message, data } = callbackQuery
+
+    if (!data || !message) {
+        await answerCallbackQuery(queryId)
+        return
+    }
+
+    const chatId = message.chat.id
+    const telegramId = from.id.toString()
+
+    // Get the user
+    const [user] = await db
+        .select()
+        .from(telegramUsers)
+        .where(eq(telegramUsers.telegramId, telegramId))
+
+    if (!user) {
+        await answerCallbackQuery(queryId, {
+            text: 'Please link your account first',
+            showAlert: true,
+        })
+        return
+    }
+
+    // Handle account selection
+    if (data.startsWith('setaccount_')) {
+        const accountId = data.replace('setaccount_', '')
+
+        // Verify user owns this account
+        const [account] = await db
+            .select({ id: accounts.id, name: accounts.name })
+            .from(accounts)
+            .where(eq(accounts.id, accountId))
+
+        if (!account) {
+            await answerCallbackQuery(queryId, {
+                text: 'Account not found',
+                showAlert: true,
+            })
+            return
+        }
+
+        // Update default account
+        await db
+            .update(telegramUsers)
+            .set({ defaultAccountId: accountId })
+            .where(eq(telegramUsers.telegramId, telegramId))
+
+        await answerCallbackQuery(queryId, {
+            text: `Default account set to: ${account.name}`,
+        })
+
+        // Now show category selection
+        const userCategories = await db
+            .select({ id: categories.id, name: categories.name })
+            .from(categories)
+            .where(eq(categories.userId, user.userId))
+
+        if (userCategories.length > 0) {
+            const categoryButtons = userCategories.map((c) => [
+                { text: c.name, callback_data: `setcategory_${c.id}` },
+            ])
+
+            await sendInlineKeyboard(
+                chatId,
+                `✅ Default account set to: ${account.name}\n\n🏷️ Now select your default category:`,
+                categoryButtons
+            )
+        } else {
+            await sendMessage(
+                chatId,
+                `✅ Default account set to: ${account.name}\n\n` +
+                    'No categories found. Create categories in the app to set a default.'
+            )
+        }
+        return
+    }
+
+    // Handle category selection
+    if (data.startsWith('setcategory_')) {
+        const categoryId = data.replace('setcategory_', '')
+
+        // Verify user owns this category
+        const [category] = await db
+            .select({ id: categories.id, name: categories.name })
+            .from(categories)
+            .where(eq(categories.id, categoryId))
+
+        if (!category) {
+            await answerCallbackQuery(queryId, {
+                text: 'Category not found',
+                showAlert: true,
+            })
+            return
+        }
+
+        // Update default category
+        await db
+            .update(telegramUsers)
+            .set({ defaultCategoryId: categoryId })
+            .where(eq(telegramUsers.telegramId, telegramId))
+
+        await answerCallbackQuery(queryId, {
+            text: `Default category set to: ${category.name}`,
+        })
+
+        await sendMessage(
+            chatId,
+            `✅ Setup complete!\n\n` +
+                `Default category set to: ${category.name}\n\n` +
+                'You can now add transactions by sending messages like:\n' +
+                '• "Spent $50 on groceries"\n' +
+                '• "Coffee $5.50 from Cash account"\n' +
+                '• "Dinner $25 category Restaurant"'
+        )
+        return
+    }
+
+    // Unknown callback
+    await answerCallbackQuery(queryId)
+}
+
 async function handleTransactionMessage(
     chatId: number,
     telegramId: string,
@@ -365,27 +498,37 @@ async function handleTransactionMessage(
         return
     }
 
-    // Check if user has a default account
-    if (!user.defaultAccountId) {
-        await sendMessage(
-            chatId,
-            '❌ Please set a default account first using /setdefaults'
-        )
-        return
-    }
+    // Get user's accounts and categories for context
+    const userAccounts = await db
+        .select({ id: accounts.id, name: accounts.name })
+        .from(accounts)
+        .where(eq(accounts.userId, user.userId))
 
-    // Get user's categories for context
     const userCategories = await db
         .select({ id: categories.id, name: categories.name })
         .from(categories)
         .where(eq(categories.userId, user.userId))
 
+    const accountNames = userAccounts.map((a) => a.name)
     const categoryNames = userCategories.map((c) => c.name)
+
+    // Check if user has a default account (required if not specifying in message)
+    if (!user.defaultAccountId && userAccounts.length === 0) {
+        await sendMessage(
+            chatId,
+            '❌ Please create an account in Cost Keeper first, then use /setdefaults to set a default.'
+        )
+        return
+    }
 
     // Parse the message with Gemini
     await sendMessage(chatId, '🔄 Processing...')
 
-    const parsed = await parseTransactionMessage(text, categoryNames)
+    const parsed = await parseTransactionMessage(
+        text,
+        categoryNames,
+        accountNames
+    )
 
     if (!parsed) {
         await sendMessage(
@@ -393,8 +536,33 @@ async function handleTransactionMessage(
             "❌ I couldn't understand that as a transaction.\n\n" +
                 'Try something like:\n' +
                 '• "Spent $50 on groceries"\n' +
-                '• "Coffee at Starbucks $5.50"\n' +
-                '• "Received $1000 salary"'
+                '• "Coffee $5.50 from Cash account"\n' +
+                '• "Dinner $25 category Restaurant"\n' +
+                '• "Electricity $100 on 2024-03-15"'
+        )
+        return
+    }
+
+    // Find matching account or use default
+    let accountId = user.defaultAccountId
+    if (parsed.accountHint) {
+        const matchingAccount = userAccounts.find(
+            (a) =>
+                a.name
+                    .toLowerCase()
+                    .includes(parsed.accountHint!.toLowerCase()) ||
+                parsed.accountHint!.toLowerCase().includes(a.name.toLowerCase())
+        )
+        if (matchingAccount) {
+            accountId = matchingAccount.id
+        }
+    }
+
+    // If no account found, require one
+    if (!accountId) {
+        await sendMessage(
+            chatId,
+            '❌ Please set a default account using /setdefaults, or specify an account in your message (e.g., "from Cash account").'
         )
         return
     }
@@ -420,14 +588,14 @@ async function handleTransactionMessage(
     if (!categoryId) {
         await sendMessage(
             chatId,
-            '❌ Please set a default category using /setdefaults or create categories in the app.'
+            '❌ Please set a default category using /setdefaults, or specify a category in your message (e.g., "category Food").'
         )
         return
     }
 
     // Create the transaction
     try {
-        const [newTransaction] = await db
+        await db
             .insert(transactions)
             .values({
                 id: createId(),
@@ -437,11 +605,13 @@ async function handleTransactionMessage(
                     ? `${parsed.notes} (via Telegram)`
                     : 'Added via Telegram',
                 date: parsed.date,
-                accountId: user.defaultAccountId,
+                accountId: accountId,
                 categoryId: categoryId,
             })
             .returning()
 
+        const accountName =
+            userAccounts.find((a) => a.id === accountId)?.name || 'Unknown'
         const categoryName =
             userCategories.find((c) => c.id === categoryId)?.name || 'Unknown'
 
@@ -449,6 +619,7 @@ async function handleTransactionMessage(
             chatId,
             `✅ Transaction added!\n\n` +
                 `💰 Amount: ${formatAmount(parsed.amount)}\n` +
+                `📁 Account: ${accountName}\n` +
                 `🏷️ Category: ${categoryName}\n` +
                 (parsed.payee ? `🏪 Payee: ${parsed.payee}\n` : '') +
                 `📅 Date: ${parsed.date.toLocaleDateString()}`

@@ -8,11 +8,13 @@ interface ParsedTransaction {
     notes: string | null
     date: Date
     categoryHint: string | null // category name hint for matching
+    accountHint: string | null // account name hint for matching
 }
 
 export async function parseTransactionMessage(
     message: string,
-    existingCategories: string[]
+    existingCategories: string[],
+    existingAccounts: string[] = []
 ): Promise<ParsedTransaction | null> {
     const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' })
 
@@ -21,13 +23,15 @@ export async function parseTransactionMessage(
 User message: "${message}"
 
 Available categories: ${existingCategories.length > 0 ? existingCategories.join(', ') : 'None specified'}
+Available accounts: ${existingAccounts.length > 0 ? existingAccounts.join(', ') : 'None specified'}
 
 Rules:
 1. Amount should be in cents (multiply by 100). Expenses should be NEGATIVE, income should be POSITIVE.
-2. If no date is mentioned, use today's date.
+2. If no date is mentioned, use today's date. Support various date formats like "2024-03-15", "March 15", "yesterday", "last week", etc.
 3. Try to match a category from the available categories, or suggest a new one.
-4. Extract the payee/merchant if mentioned.
-5. Any additional context goes in notes.
+4. Try to match an account from the available accounts if mentioned (look for patterns like "from X account", "in X", "account X").
+5. Extract the payee/merchant if mentioned.
+6. Any additional context goes in notes.
 
 Respond ONLY with valid JSON in this exact format (no markdown, no explanation):
 {
@@ -35,7 +39,8 @@ Respond ONLY with valid JSON in this exact format (no markdown, no explanation):
     "payee": "<string or null>",
     "notes": "<string or null>",
     "date": "<ISO date string>",
-    "categoryHint": "<string or null>"
+    "categoryHint": "<string or null>",
+    "accountHint": "<string or null>"
 }
 
 If you cannot parse a valid transaction from the message, respond with: null`
@@ -65,6 +70,7 @@ If you cannot parse a valid transaction from the message, respond with: null`
             notes: parsed.notes || null,
             date: new Date(parsed.date),
             categoryHint: parsed.categoryHint || null,
+            accountHint: parsed.accountHint || null,
         }
     } catch (error) {
         console.error('Error parsing transaction with Gemini:', error)
