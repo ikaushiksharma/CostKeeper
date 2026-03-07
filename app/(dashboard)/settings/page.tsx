@@ -19,6 +19,7 @@ import { Switch } from '@/components/ui/switch'
 import { useGetSettings } from '@/features/settings/api/use-get-settings'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useUpdateSettings } from '@/features/settings/api/use-update-settings'
+import { TelegramSettings } from '@/components/telegram-settings'
 
 const formSchema = z.object({
     dateTimeMode: z.boolean(),
@@ -120,6 +121,8 @@ const Page = () => {
                     </Form>
                 </CardContent>
             </Card>
+
+            <TelegramSettings />
         </div>
     )
 }
