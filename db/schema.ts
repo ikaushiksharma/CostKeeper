@@ -64,3 +64,23 @@ export const settings = pgTable('settings', {
     dateTimeMode: boolean('date_time_mode').default(false),
     userId: text('user_id').primaryKey(),
 })
+
+// Telegram integration - links Telegram users to Clerk users
+export const telegramUsers = pgTable('telegram_users', {
+    id: text('id').primaryKey(),
+    telegramId: text('telegram_id').notNull().unique(),
+    telegramUsername: text('telegram_username'),
+    userId: text('user_id').notNull(), // Clerk user ID
+    defaultAccountId: text('default_account_id').references(() => accounts.id, {
+        onDelete: 'set null',
+    }),
+    defaultCategoryId: text('default_category_id').references(
+        () => categories.id,
+        {
+            onDelete: 'set null',
+        }
+    ),
+    createdAt: timestamp('created_at', { mode: 'date' }).defaultNow(),
+})
+
+export const insertTelegramUserSchema = createInsertSchema(telegramUsers)

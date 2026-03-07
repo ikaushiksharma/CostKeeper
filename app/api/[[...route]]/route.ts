@@ -5,6 +5,7 @@ import categories from './categories'
 import transactions from './transactions'
 import summary from './summary'
 import settings from './settings'
+import telegram from './telegram'
 export const runtime = 'edge'
 
 const app = new Hono().basePath('/api')
@@ -15,6 +16,7 @@ const routes = app
     .route('/summary', summary)
     .route('/transactions', transactions)
     .route('/settings', settings)
+    .route('/telegram', telegram)
 
 export const GET = handle(app)
 export const POST = handle(app)

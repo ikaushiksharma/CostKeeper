@@ -1,0 +1,243 @@
+{
+    "id": "4949db2a-998f-44da-a3a2-847ba1632323",
+    "prevId": "bafb6197-0027-4082-93da-f70b562490c8",
+    "version": "6",
+    "dialect": "postgresql",
+    "tables": {
+        "public.accounts": {
+            "name": "accounts",
+            "schema": "",
+            "columns": {
+                "id": {
+                    "name": "id",
+                    "type": "text",
+                    "primaryKey": true,
+                    "notNull": true
+                },
+                "name": {
+                    "name": "name",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "user_id": {
+                    "name": "user_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true
+                }
+            },
+            "indexes": {},
+            "foreignKeys": {},
+            "compositePrimaryKeys": {},
+            "uniqueConstraints": {}
+        },
+        "public.categories": {
+            "name": "categories",
+            "schema": "",
+            "columns": {
+                "id": {
+                    "name": "id",
+                    "type": "text",
+                    "primaryKey": true,
+                    "notNull": true
+                },
+                "name": {
+                    "name": "name",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "user_id": {
+                    "name": "user_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true
+                }
+            },
+            "indexes": {},
+            "foreignKeys": {},
+            "compositePrimaryKeys": {},
+            "uniqueConstraints": {}
+        },
+        "public.settings": {
+            "name": "settings",
+            "schema": "",
+            "columns": {
+                "date_time_mode": {
+                    "name": "date_time_mode",
+                    "type": "boolean",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "default": false
+                },
+                "user_id": {
+                    "name": "user_id",
+                    "type": "text",
+                    "primaryKey": true,
+                    "notNull": true
+                }
+            },
+            "indexes": {},
+            "foreignKeys": {},
+            "compositePrimaryKeys": {},
+            "uniqueConstraints": {}
+        },
+        "public.telegram_users": {
+            "name": "telegram_users",
+            "schema": "",
+            "columns": {
+                "id": {
+                    "name": "id",
+                    "type": "text",
+                    "primaryKey": true,
+                    "notNull": true
+                },
+                "telegram_id": {
+                    "name": "telegram_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "telegram_username": {
+                    "name": "telegram_username",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "user_id": {
+                    "name": "user_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "default_account_id": {
+                    "name": "default_account_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "default_category_id": {
+                    "name": "default_category_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "created_at": {
+                    "name": "created_at",
+                    "type": "timestamp",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "default": "now()"
+                }
+            },
+            "indexes": {},
+            "foreignKeys": {
+                "telegram_users_default_account_id_accounts_id_fk": {
+                    "name": "telegram_users_default_account_id_accounts_id_fk",
+                    "tableFrom": "telegram_users",
+                    "tableTo": "accounts",
+                    "columnsFrom": ["default_account_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "set null",
+                    "onUpdate": "no action"
+                },
+                "telegram_users_default_category_id_categories_id_fk": {
+                    "name": "telegram_users_default_category_id_categories_id_fk",
+                    "tableFrom": "telegram_users",
+                    "tableTo": "categories",
+                    "columnsFrom": ["default_category_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "set null",
+                    "onUpdate": "no action"
+                }
+            },
+            "compositePrimaryKeys": {},
+            "uniqueConstraints": {
+                "telegram_users_telegram_id_unique": {
+                    "name": "telegram_users_telegram_id_unique",
+                    "nullsNotDistinct": false,
+                    "columns": ["telegram_id"]
+                }
+            }
+        },
+        "public.transactions": {
+            "name": "transactions",
+            "schema": "",
+            "columns": {
+                "id": {
+                    "name": "id",
+                    "type": "text",
+                    "primaryKey": true,
+                    "notNull": true
+                },
+                "amount": {
+                    "name": "amount",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "payee": {
+                    "name": "payee",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "notes": {
+                    "name": "notes",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "date": {
+                    "name": "date",
+                    "type": "timestamp",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "account_id": {
+                    "name": "account_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "category_id": {
+                    "name": "category_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true
+                }
+            },
+            "indexes": {},
+            "foreignKeys": {
+                "transactions_account_id_accounts_id_fk": {
+                    "name": "transactions_account_id_accounts_id_fk",
+                    "tableFrom": "transactions",
+                    "tableTo": "accounts",
+                    "columnsFrom": ["account_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "cascade",
+                    "onUpdate": "no action"
+                },
+                "transactions_category_id_categories_id_fk": {
+                    "name": "transactions_category_id_categories_id_fk",
+                    "tableFrom": "transactions",
+                    "tableTo": "categories",
+                    "columnsFrom": ["category_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "set null",
+                    "onUpdate": "no action"
+                }
+            },
+            "compositePrimaryKeys": {},
+            "uniqueConstraints": {}
+        }
+    },
+    "enums": {},
+    "schemas": {},
+    "_meta": {
+        "columns": {},
+        "schemas": {},
+        "tables": {}
+    }
+}
