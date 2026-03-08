@@ -1,8 +1,17 @@
 import { createId } from '@paralleldrive/cuid2'
 import { eq } from 'drizzle-orm'
 import { Hono } from 'hono'
+import { clerkMiddleware, getAuth } from '@hono/clerk-auth'
+import { zValidator } from '@hono/zod-validator'
+import { z } from 'zod'
 import { db } from '@/db/drizzle'
-import { accounts, categories, telegramUsers, transactions } from '@/db/schema'
+import {
+    accounts,
+    categories,
+    settings,
+    telegramUsers,
+    transactions,
+} from '@/db/schema'
 import { parseTransactionMessage } from '@/lib/gemini'
 import {
     answerCallbackQuery,
@@ -91,6 +100,23 @@ const app = new Hono()
         ).toString('base64url')
 
         return ctx.json({ linkCode })
+    })
+    // Get telegram link status for the authenticated user
+    .get('/status', clerkMiddleware(), async (ctx) => {
+        const auth = getAuth(ctx)
+
+        if (!auth?.userId) {
+            return ctx.json({ error: 'Unauthorized.' }, 401)
+        }
+
+        const [telegramUser] = await db
+            .select({
+                telegramUsername: telegramUsers.telegramUsername,
+            })
+            .from(telegramUsers)
+            .where(eq(telegramUsers.userId, auth.userId))
+
+        return ctx.json({ data: telegramUser || null })
     })
 
 async function handleCommand(
@@ -225,29 +251,39 @@ async function handleStatusCommand(chatId: number, telegramId: string) {
         return
     }
 
+    // Get defaults from centralized settings
+    const [userSettings] = await db
+        .select({
+            defaultAccountId: settings.defaultAccountId,
+            defaultCategoryId: settings.defaultCategoryId,
+        })
+        .from(settings)
+        .where(eq(settings.userId, user.userId))
+
     let status = '✅ Account linked!\n\n'
 
-    if (user.defaultAccountId) {
+    if (userSettings?.defaultAccountId) {
         const [account] = await db
             .select({ name: accounts.name })
             .from(accounts)
-            .where(eq(accounts.id, user.defaultAccountId))
+            .where(eq(accounts.id, userSettings.defaultAccountId))
         status += `📁 Default Account: ${account?.name || 'Not found'}\n`
     } else {
         status += '📁 Default Account: Not set\n'
     }
 
-    if (user.defaultCategoryId) {
+    if (userSettings?.defaultCategoryId) {
         const [category] = await db
             .select({ name: categories.name })
             .from(categories)
-            .where(eq(categories.id, user.defaultCategoryId))
+            .where(eq(categories.id, userSettings.defaultCategoryId))
         status += `🏷️ Default Category: ${category?.name || 'Not found'}\n`
     } else {
         status += '🏷️ Default Category: Not set\n'
     }
 
-    status += '\nUse /setdefaults to change your defaults.'
+    status +=
+        '\nUse /setdefaults to change your defaults, or set them in the app Settings.'
     await sendMessage(chatId, status)
 }
 
@@ -399,11 +435,11 @@ async function handleCallbackQuery(callbackQuery: TelegramCallbackQuery) {
             return
         }
 
-        // Update default account
+        // Update default account in centralized settings
         await db
-            .update(telegramUsers)
+            .update(settings)
             .set({ defaultAccountId: accountId })
-            .where(eq(telegramUsers.telegramId, telegramId))
+            .where(eq(settings.userId, user.userId))
 
         await answerCallbackQuery(queryId, {
             text: `Default account set to: ${account.name}`,
@@ -453,11 +489,11 @@ async function handleCallbackQuery(callbackQuery: TelegramCallbackQuery) {
             return
         }
 
-        // Update default category
+        // Update default category in centralized settings
         await db
-            .update(telegramUsers)
+            .update(settings)
             .set({ defaultCategoryId: categoryId })
-            .where(eq(telegramUsers.telegramId, telegramId))
+            .where(eq(settings.userId, user.userId))
 
         await answerCallbackQuery(queryId, {
             text: `Default category set to: ${category.name}`,
@@ -498,6 +534,15 @@ async function handleTransactionMessage(
         return
     }
 
+    // Get centralized settings for defaults
+    const [userSettings] = await db
+        .select({
+            defaultAccountId: settings.defaultAccountId,
+            defaultCategoryId: settings.defaultCategoryId,
+        })
+        .from(settings)
+        .where(eq(settings.userId, user.userId))
+
     // Get user's accounts and categories for context
     const userAccounts = await db
         .select({ id: accounts.id, name: accounts.name })
@@ -512,8 +557,8 @@ async function handleTransactionMessage(
     const accountNames = userAccounts.map((a) => a.name)
     const categoryNames = userCategories.map((c) => c.name)
 
-    // Check if user has a default account (required if not specifying in message)
-    if (!user.defaultAccountId && userAccounts.length === 0) {
+    // Check if user has accounts
+    if (userAccounts.length === 0) {
         await sendMessage(
             chatId,
             '❌ Please create an account in Cost Keeper first, then use /setdefaults to set a default.'
@@ -543,8 +588,8 @@ async function handleTransactionMessage(
         return
     }
 
-    // Find matching account or use default
-    let accountId = user.defaultAccountId
+    // Find matching account or use default from settings
+    let accountId = userSettings?.defaultAccountId || null
     if (parsed.accountHint) {
         const matchingAccount = userAccounts.find(
             (a) =>
@@ -562,13 +607,13 @@ async function handleTransactionMessage(
     if (!accountId) {
         await sendMessage(
             chatId,
-            '❌ Please set a default account using /setdefaults, or specify an account in your message (e.g., "from Cash account").'
+            '❌ Please set a default account in Settings or /setdefaults, or specify an account in your message (e.g., "from Cash account").'
         )
         return
     }
 
-    // Find matching category or use default
-    let categoryId = user.defaultCategoryId
+    // Find matching category or use default from settings
+    let categoryId = userSettings?.defaultCategoryId || null
     if (parsed.categoryHint) {
         const matchingCategory = userCategories.find(
             (c) =>
@@ -588,7 +633,7 @@ async function handleTransactionMessage(
     if (!categoryId) {
         await sendMessage(
             chatId,
-            '❌ Please set a default category using /setdefaults, or specify a category in your message (e.g., "category Food").'
+            '❌ Please set a default category in Settings or /setdefaults, or specify a category in your message (e.g., "category Food").'
         )
         return
     }

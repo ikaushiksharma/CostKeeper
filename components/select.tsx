@@ -36,7 +36,16 @@ export const Select = ({
         <CreatableSelect
             placeholder={placeholder}
             className="text-sm h-10 bg-background"
+            menuPortalTarget={document.body}
             styles={{
+                menuPortal: (base) => ({
+                    ...base,
+                    zIndex: 9999,
+                }),
+                menu: (base) => ({
+                    ...base,
+                    zIndex: 9999,
+                }),
                 menuList: (base) => ({
                     ...base,
                     backgroundColor: 'hsl(var(--background))',

@@ -17,6 +17,8 @@ const app = new Hono()
         const data = await db
             .select({
                 dateTimeMode: settings.dateTimeMode,
+                defaultAccountId: settings.defaultAccountId,
+                defaultCategoryId: settings.defaultCategoryId,
             })
             .from(settings)
             .where(eq(settings.userId, auth.userId))
@@ -29,7 +31,9 @@ const app = new Hono()
         zValidator(
             'json',
             z.object({
-                dateTimeMode: z.boolean(),
+                dateTimeMode: z.boolean().optional(),
+                defaultAccountId: z.string().nullable().optional(),
+                defaultCategoryId: z.string().nullable().optional(),
             })
         ),
 

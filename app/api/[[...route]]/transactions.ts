@@ -13,6 +13,7 @@ import {
     insertTransactionSchema,
     transactions,
 } from '@/db/schema'
+import { parseTransactionMessage } from '@/lib/gemini'
 
 const DEFAULT_PAGE_SIZE = 20
 
@@ -375,6 +376,147 @@ const app = new Hono()
             }
 
             return ctx.json({ data })
+        }
+    )
+    // Quick entry endpoint for natural language transaction input
+    .post(
+        '/quick-entry',
+        clerkMiddleware(),
+        zValidator(
+            'json',
+            z.object({
+                message: z.string().min(1),
+                defaultAccountId: z.string().optional(),
+                defaultCategoryId: z.string().optional(),
+            })
+        ),
+        async (ctx) => {
+            const auth = getAuth(ctx)
+            const { message, defaultAccountId, defaultCategoryId } =
+                ctx.req.valid('json')
+
+            if (!auth?.userId) {
+                return ctx.json({ error: 'Unauthorized.' }, 401)
+            }
+
+            // Get user's accounts and categories for context
+            const userAccounts = await db
+                .select({ id: accounts.id, name: accounts.name })
+                .from(accounts)
+                .where(eq(accounts.userId, auth.userId))
+
+            const userCategories = await db
+                .select({ id: categories.id, name: categories.name })
+                .from(categories)
+                .where(eq(categories.userId, auth.userId))
+
+            if (userAccounts.length === 0) {
+                return ctx.json(
+                    { error: 'Please create an account first.' },
+                    400
+                )
+            }
+
+            const accountNames = userAccounts.map((a) => a.name)
+            const categoryNames = userCategories.map((c) => c.name)
+
+            // Parse the message with Gemini
+            const parsed = await parseTransactionMessage(
+                message,
+                categoryNames,
+                accountNames
+            )
+
+            if (!parsed) {
+                return ctx.json(
+                    {
+                        error: "Couldn't understand the transaction. Try something like 'Spent 50 on groceries' or 'Coffee 150 from Cash'",
+                    },
+                    400
+                )
+            }
+
+            // Find matching account or use default
+            let accountId = defaultAccountId || null
+            if (parsed.accountHint) {
+                const matchingAccount = userAccounts.find(
+                    (a) =>
+                        a.name
+                            .toLowerCase()
+                            .includes(parsed.accountHint!.toLowerCase()) ||
+                        parsed
+                            .accountHint!.toLowerCase()
+                            .includes(a.name.toLowerCase())
+                )
+                if (matchingAccount) {
+                    accountId = matchingAccount.id
+                }
+            }
+
+            // If no account found, use first account as fallback
+            if (!accountId) {
+                accountId = userAccounts[0].id
+            }
+
+            // Find matching category or use default
+            let categoryId = defaultCategoryId || null
+            if (parsed.categoryHint) {
+                const matchingCategory = userCategories.find(
+                    (c) =>
+                        c.name
+                            .toLowerCase()
+                            .includes(parsed.categoryHint!.toLowerCase()) ||
+                        parsed
+                            .categoryHint!.toLowerCase()
+                            .includes(c.name.toLowerCase())
+                )
+                if (matchingCategory) {
+                    categoryId = matchingCategory.id
+                }
+            }
+
+            // If still no category, use first category or return error
+            if (!categoryId && userCategories.length > 0) {
+                categoryId = userCategories[0].id
+            }
+
+            if (!categoryId) {
+                return ctx.json(
+                    { error: 'Please create a category first.' },
+                    400
+                )
+            }
+
+            // Create the transaction
+            const [data] = await db
+                .insert(transactions)
+                .values({
+                    id: createId(),
+                    amount: parsed.amount,
+                    payee: parsed.payee || parsed.categoryHint || 'Quick Entry',
+                    notes: parsed.notes || 'Added via Quick Entry',
+                    date: parsed.date,
+                    accountId: accountId,
+                    categoryId: categoryId,
+                })
+                .returning()
+
+            const accountName =
+                userAccounts.find((a) => a.id === accountId)?.name || 'Unknown'
+            const categoryName =
+                userCategories.find((c) => c.id === categoryId)?.name ||
+                'Unknown'
+
+            return ctx.json({
+                data,
+                parsed: {
+                    amount: parsed.amount,
+                    accountName,
+                    categoryName,
+                    payee: parsed.payee,
+                    date: parsed.date,
+                },
+            })
         }
     )
 

@@ -20,6 +20,7 @@ import { useGetSettings } from '@/features/settings/api/use-get-settings'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useUpdateSettings } from '@/features/settings/api/use-update-settings'
 import { TelegramSettings } from '@/components/telegram-settings'
+import { QuickEntryDefaults } from '@/components/quick-entry-defaults'
 
 const formSchema = z.object({
     dateTimeMode: z.boolean(),
@@ -122,7 +123,10 @@ const Page = () => {
                 </CardContent>
             </Card>
 
-            <TelegramSettings />
+            <div className="flex flex-row max-sm:flex-col items-start gap-2 justify-center">
+                <QuickEntryDefaults />
+                <TelegramSettings />
+            </div>
         </div>
     )
 }

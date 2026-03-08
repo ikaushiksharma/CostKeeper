@@ -15,6 +15,20 @@
             "when": 1772888876575,
             "tag": "0001_parallel_hardball",
             "breakpoints": true
+        },
+        {
+            "idx": 2,
+            "version": "6",
+            "when": 1772911135559,
+            "tag": "0002_chemical_scorpion",
+            "breakpoints": true
+        },
+        {
+            "idx": 3,
+            "version": "6",
+            "when": 1772954711023,
+            "tag": "0003_moaning_thor",
+            "breakpoints": true
         }
     ]
 }

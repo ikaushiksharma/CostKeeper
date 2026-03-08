@@ -33,16 +33,12 @@ export const transactions = pgTable('transactions', {
     payee: text('payee'),
     notes: text('notes'),
     date: timestamp('date', { mode: 'date' }).notNull(),
-    accountId: text('account_id')
-        .references(() => accounts.id, {
-            onDelete: 'cascade',
-        })
-        .notNull(),
-    categoryId: text('category_id')
-        .references(() => categories.id, {
-            onDelete: 'set null',
-        })
-        .notNull(),
+    accountId: text('account_id').references(() => accounts.id, {
+        onDelete: 'cascade',
+    }),
+    categoryId: text('category_id').references(() => categories.id, {
+        onDelete: 'set null',
+    }),
 })
 
 export const transactionsRelations = relations(transactions, ({ one }) => ({
@@ -63,6 +59,16 @@ export const insertTransactionSchema = createInsertSchema(transactions, {
 export const settings = pgTable('settings', {
     dateTimeMode: boolean('date_time_mode').default(false),
     userId: text('user_id').primaryKey(),
+    defaultAccountId: text('default_account_id')
+        .references(() => accounts.id, {
+            onDelete: 'set null',
+        })
+        .default(''),
+    defaultCategoryId: text('default_category_id')
+        .references(() => categories.id, {
+            onDelete: 'set null',
+        })
+        .default(''),
 })
 
 // Telegram integration - links Telegram users to Clerk users
