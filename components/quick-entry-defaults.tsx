@@ -70,6 +70,7 @@ export function QuickEntryDefaults() {
                                     Default Account
                                 </Label>
                                 <Select
+                                    menuPortalTarget={document.body}
                                     value={settingsQuery.data?.defaultAccountId}
                                     onChange={(value) => {
                                         updateSettingsMutation.mutate({
@@ -87,6 +88,7 @@ export function QuickEntryDefaults() {
                                     Default Category
                                 </Label>
                                 <Select
+                                    menuPortalTarget={document.body}
                                     value={
                                         settingsQuery.data?.defaultCategoryId
                                     }

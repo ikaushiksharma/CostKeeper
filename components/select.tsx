@@ -12,6 +12,7 @@ type SelectProps = {
     value?: string | null | undefined
     disabled?: boolean
     placeholder?: string
+    menuPortalTarget?: HTMLElement | null
 }
 
 export const Select = ({
@@ -21,6 +22,7 @@ export const Select = ({
     options = [],
     disabled,
     placeholder,
+    menuPortalTarget = null,
 }: SelectProps) => {
     const onSelect = (
         option: SingleValue<{ label: string; value: string }>
@@ -36,15 +38,15 @@ export const Select = ({
         <CreatableSelect
             placeholder={placeholder}
             className="text-sm h-10 bg-background"
-            menuPortalTarget={document.body}
+            menuPortalTarget={menuPortalTarget}
             styles={{
                 menuPortal: (base) => ({
                     ...base,
-                    zIndex: 9999,
+                    ...(menuPortalTarget === document.body && { zIndex: 9999 }),
                 }),
                 menu: (base) => ({
                     ...base,
-                    zIndex: 9999,
+                    ...(menuPortalTarget === document.body && { zIndex: 9999 }),
                 }),
                 menuList: (base) => ({
                     ...base,
