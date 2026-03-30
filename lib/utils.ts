@@ -13,7 +13,7 @@ export function convertAmountToMilliunits(amount: number) {
 }
 
 export function formatCurrency(value: number) {
-    return Intl.NumberFormat('en-us', {
+    return Intl.NumberFormat('en-IN', {
         style: 'currency',
         currency: 'INR',
         minimumFractionDigits: 2,
@@ -90,7 +90,7 @@ export function formatPercentage(
     value: number,
     options: { addPrefix?: boolean } = { addPrefix: false }
 ) {
-    const result = new Intl.NumberFormat('en-US', {
+    const result = new Intl.NumberFormat('en-IN', {
         style: 'percent',
     }).format(value / 100)
 
