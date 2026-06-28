@@ -1,6 +1,6 @@
 'use client'
 
-import { Loader2, Plus } from 'lucide-react'
+import { Loader2, Plus, TrendingUp } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { toast } from 'sonner'
 import { DataTable } from '@/components/data-table'
@@ -12,6 +12,7 @@ import { useSelectAccount } from '@/features/accounts/hooks/use-select-account'
 import { useBulkCreateTransactions } from '@/features/transactions/api/use-bulk-create-transactions'
 import { useBulkDeleteTransactions } from '@/features/transactions/api/use-bulk-delete-transactions'
 import { useGetTransactions } from '@/features/transactions/api/use-get-transactions'
+import { CopyIncomeDialog } from '@/features/transactions/components/copy-income-dialog'
 import { useNewTransaction } from '@/features/transactions/hooks/use-new-transaction'
 
 import { columns } from './columns'
@@ -32,6 +33,7 @@ const INITIAL_IMPORT_RESULTS = {
 const TransactionsPage = () => {
     const [variant, setVariant] = useState<VARIANTS>(VARIANTS.LIST)
     const [importResults, setImportResults] = useState(INITIAL_IMPORT_RESULTS)
+    const [copyIncomeOpen, setCopyIncomeOpen] = useState(false)
     const [AccountDialog, confirm] = useSelectAccount()
     const newTransaction = useNewTransaction()
     const createTransactions = useBulkCreateTransactions()
@@ -107,6 +109,10 @@ const TransactionsPage = () => {
     }
     return (
         <div className="max-w-screen-2xl mx-auto w-full pb-10 -mt-6">
+            <CopyIncomeDialog
+                open={copyIncomeOpen}
+                onOpenChange={setCopyIncomeOpen}
+            />
             <Card className="border-none drop-shadow-sm">
                 <CardHeader className="gap-y-2 lg:flex-row lg:items-center lg:justify-between">
                     <CardTitle className="text-xl line-clamp-1">
@@ -120,6 +126,16 @@ const TransactionsPage = () => {
                             className="w-full lg:w-auto"
                         >
                             <Plus className="size-4 mr-2" /> Add new
+                        </Button>
+
+                        <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => setCopyIncomeOpen(true)}
+                            className="w-full lg:w-auto"
+                        >
+                            <TrendingUp className="size-4 mr-2" />
+                            Copy last month&apos;s income
                         </Button>
 
                         <UploadButton onUpload={onUpload} />

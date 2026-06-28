@@ -1,8 +1,8 @@
 import { clerkMiddleware, getAuth } from '@hono/clerk-auth'
 import { zValidator } from '@hono/zod-validator'
 import { createId } from '@paralleldrive/cuid2'
-import { parse, startOfMonth } from 'date-fns'
-import { and, desc, eq, gte, inArray, lte, sql } from 'drizzle-orm'
+import { endOfMonth, parse, startOfMonth, subMonths } from 'date-fns'
+import { and, desc, eq, gt, gte, inArray, lte, sql } from 'drizzle-orm'
 import { Hono } from 'hono'
 import { z } from 'zod'
 
@@ -93,6 +93,44 @@ const app = new Hono()
             })
         }
     )
+    .get('/last-month-income', clerkMiddleware(), async (ctx) => {
+        const auth = getAuth(ctx)
+
+        if (!auth?.userId) {
+            return ctx.json({ error: 'Unauthorized.' }, 401)
+        }
+
+        const now = new Date()
+        const lastMonthStart = startOfMonth(subMonths(now, 1))
+        const lastMonthEnd = endOfMonth(subMonths(now, 1))
+
+        const data = await db
+            .select({
+                id: transactions.id,
+                date: transactions.date,
+                category: categories.name,
+                categoryId: transactions.categoryId,
+                payee: transactions.payee,
+                amount: transactions.amount,
+                notes: transactions.notes,
+                account: accounts.name,
+                accountId: transactions.accountId,
+            })
+            .from(transactions)
+            .innerJoin(accounts, eq(transactions.accountId, accounts.id))
+            .leftJoin(categories, eq(transactions.categoryId, categories.id))
+            .where(
+                and(
+                    eq(accounts.userId, auth.userId),
+                    gte(transactions.date, lastMonthStart),
+                    lte(transactions.date, lastMonthEnd),
+                    gt(transactions.amount, 0)
+                )
+            )
+            .orderBy(desc(transactions.date))
+
+        return ctx.json({ data })
+    })
     .get(
         '/:id',
         zValidator(
