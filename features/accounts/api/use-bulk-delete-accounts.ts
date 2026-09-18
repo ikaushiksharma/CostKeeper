@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { InferRequestType, InferResponseType } from 'hono'
+import type { InferRequestType, InferResponseType } from 'hono'
 import { toast } from 'sonner'
 
 import { client } from '@/lib/hono'
@@ -16,7 +16,7 @@ export const useBulkDeleteAccounts = () => {
 
     const mutation = useMutation<ResponseType, Error, RequestType>({
         mutationFn: async (json) => {
-            const response = await client.api.accounts['bulk-delete']['$post']({
+            const response = await client.api.accounts['bulk-delete'].$post({
                 json,
             })
             return await response.json()

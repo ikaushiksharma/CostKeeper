@@ -13,11 +13,11 @@ import {
     PopoverTrigger,
 } from '@/components/ui/popover'
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
-import { SelectSingleEventHandler } from 'react-day-picker'
+import type { SelectSingleEventHandler } from 'react-day-picker'
 
 type DatePickerProps = {
     value?: Date
-    onChange?: any
+    onChange?: (date: Date) => void
     disabled?: boolean
 }
 
@@ -34,17 +34,18 @@ export function DateTimePicker({ value, onChange, disabled }: DatePickerProps) {
             const newDate = new Date(value)
             if (type === 'hour') {
                 newDate.setHours(
-                    (parseInt(val) % 12) + (newDate.getHours() >= 12 ? 12 : 0)
+                    (parseInt(val, 10) % 12) +
+                        (newDate.getHours() >= 12 ? 12 : 0)
                 )
             } else if (type === 'minute') {
-                newDate.setMinutes(parseInt(val))
+                newDate.setMinutes(parseInt(val, 10))
             } else if (type === 'ampm') {
                 const currentHours = newDate.getHours()
                 newDate.setHours(
                     val === 'PM' ? currentHours + 12 : currentHours - 12
                 )
             }
-            onChange(newDate)
+            onChange?.(newDate)
         }
     }
 
@@ -55,7 +56,7 @@ export function DateTimePicker({ value, onChange, disabled }: DatePickerProps) {
                 newDate.setHours(value.getHours())
                 newDate.setMinutes(value.getMinutes())
             }
-            onChange(newDate)
+            onChange?.(newDate)
             setIsOpen(false)
         }
     }

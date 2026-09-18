@@ -8,7 +8,7 @@ import { convertAmountToMilliunits } from '@/lib/utils'
 
 config({ path: '.env.local' })
 
-const sql = neon(process.env.DATABASE_URL!)
+const sql = neon(process.env.DATABASE_URL)
 const db = drizzle(sql)
 
 const SEED_USER_ID = 'user_2gIujdiMTbMqEMKu0iUjgYUmox1'
@@ -103,7 +103,9 @@ const generateTransactions = () => {
         end: defaultTo,
     })
 
-    days.forEach((day) => generateTransactionPerDay(day))
+    for (const day of days) {
+        generateTransactionPerDay(day)
+    }
 }
 
 generateTransactions()

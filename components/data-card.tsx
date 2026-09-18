@@ -1,4 +1,4 @@
-import { type IconType } from 'react-icons'
+import type { IconType } from 'react-icons'
 import { cva, type VariantProps } from 'class-variance-authority'
 
 import {

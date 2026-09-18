@@ -43,9 +43,9 @@ export const PieVariant = ({ data }: PieVariantProps) => {
                     content={({ payload }) => {
                         return (
                             <ul className="flex flex-col space-y-2">
-                                {payload?.map((entry, index) => (
+                                {payload?.map((entry) => (
                                     <li
-                                        key={`item-${index}`}
+                                        key={String(entry.value)}
                                         className="flex items-center space-x-2"
                                     >
                                         <span
@@ -95,9 +95,9 @@ export const PieVariant = ({ data }: PieVariantProps) => {
                     dataKey="value"
                     labelLine={false}
                 >
-                    {data.map((_entry, index) => (
+                    {data.map((entry, index) => (
                         <Cell
-                            key={`cell-${index}`}
+                            key={entry.name}
                             fill={COLORS[index % COLORS.length]}
                         />
                     ))}

@@ -1,6 +1,6 @@
 import { format } from 'date-fns'
 import { CalendarIcon } from 'lucide-react'
-import { type SelectSingleEventHandler } from 'react-day-picker'
+import type { SelectSingleEventHandler } from 'react-day-picker'
 
 import { Button } from '@/components/ui/button'
 import { Calendar } from '@/components/ui/calendar'

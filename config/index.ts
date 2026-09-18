@@ -7,6 +7,7 @@ import type { Metadata } from 'next'
 export const siteConfig: Metadata = {
     title: 'CostKeeper',
     description: 'Track your income and expenses with CostKeeper.',
+    manifest: '/manifest.json',
     keywords: [
         'reactjs',
         'nextjs',

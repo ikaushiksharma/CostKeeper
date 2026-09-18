@@ -1,5 +1,4 @@
 import { useOpenAccount } from '@/features/accounts/hooks/use-open-account'
-import { cn } from '@/lib/utils'
 
 type AccountColumnProps = {
     account: string
@@ -13,6 +12,7 @@ export const AccountColumn = ({ account, accountId }: AccountColumnProps) => {
 
     return (
         <button
+            type="button"
             onClick={onClick}
             className="flex items-center cursor-pointer hover:underline"
         >

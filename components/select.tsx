@@ -1,6 +1,5 @@
 'use client'
 
-import { useTheme } from 'next-themes'
 import { useMemo } from 'react'
 import type { SingleValue } from 'react-select'
 import CreatableSelect from 'react-select/creatable'
@@ -33,7 +32,6 @@ export const Select = ({
     const formattedValue = useMemo(() => {
         return options.find((option) => option.value === value)
     }, [options, value])
-    const { theme } = useTheme()
     return (
         <CreatableSelect
             placeholder={placeholder}

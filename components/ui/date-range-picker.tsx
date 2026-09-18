@@ -85,6 +85,60 @@ const PRESETS: Preset[] = [
     { name: 'lastYear', label: 'Last Year' },
 ]
 
+const getPresetRange = (presetName: string): DateRange => {
+    const preset = PRESETS.find(({ name }) => name === presetName)
+    if (!preset) throw new Error(`Unknown date range preset: ${presetName}`)
+    const today = new Date()
+
+    switch (preset.name) {
+        case 'today':
+            return { from: startOfDay(today), to: endOfDay(today) }
+        case 'yesterday': {
+            const yesterday = subDays(today, 1)
+            return { from: startOfDay(yesterday), to: endOfDay(yesterday) }
+        }
+        case 'last7':
+            return {
+                from: startOfDay(subDays(today, 6)),
+                to: endOfDay(today),
+            }
+        case 'last14':
+            return {
+                from: startOfDay(subDays(today, 13)),
+                to: endOfDay(today),
+            }
+        case 'last30':
+            return {
+                from: startOfDay(subDays(today, 29)),
+                to: endOfDay(today),
+            }
+        case 'thisMonth':
+            return { from: startOfMonth(today), to: endOfDay(today) }
+        case 'lastMonth': {
+            const lastMonth = subMonths(today, 1)
+            return {
+                from: startOfMonth(lastMonth),
+                to: endOfMonth(lastMonth),
+            }
+        }
+        case 'nextMonth': {
+            const nextMonth = addMonths(today, 1)
+            return {
+                from: startOfMonth(nextMonth),
+                to: endOfMonth(nextMonth),
+            }
+        }
+        case 'thisYear':
+            return { from: startOfYear(today), to: endOfDay(today) }
+        case 'lastYear': {
+            const lastYear = subYears(today, 1)
+            return { from: startOfYear(lastYear), to: endOfYear(lastYear) }
+        }
+        default:
+            return { from: startOfDay(today), to: endOfDay(today) }
+    }
+}
+
 /** The DateRangePicker component allows a user to select a range of dates */
 export const DateRangePicker: FC<DateRangePickerProps> = ({
     initialDateFrom = new Date(new Date().setHours(0, 0, 0, 0)),
@@ -135,66 +189,28 @@ export const DateRangePicker: FC<DateRangePickerProps> = ({
         }
     }, [])
 
-    const getPresetRange = (presetName: string): DateRange => {
-        const preset = PRESETS.find(({ name }) => name === presetName)
-        if (!preset) throw new Error(`Unknown date range preset: ${presetName}`)
-        const today = new Date()
-
-        switch (preset.name) {
-            case 'today':
-                return { from: startOfDay(today), to: endOfDay(today) }
-            case 'yesterday': {
-                const yesterday = subDays(today, 1)
-                return { from: startOfDay(yesterday), to: endOfDay(yesterday) }
-            }
-            case 'last7':
-                return {
-                    from: startOfDay(subDays(today, 6)),
-                    to: endOfDay(today),
-                }
-            case 'last14':
-                return {
-                    from: startOfDay(subDays(today, 13)),
-                    to: endOfDay(today),
-                }
-            case 'last30':
-                return {
-                    from: startOfDay(subDays(today, 29)),
-                    to: endOfDay(today),
-                }
-            case 'thisMonth':
-                return { from: startOfMonth(today), to: endOfDay(today) }
-            case 'lastMonth': {
-                const lastMonth = subMonths(today, 1)
-                return {
-                    from: startOfMonth(lastMonth),
-                    to: endOfMonth(lastMonth),
-                }
-            }
-            case 'nextMonth': {
-                const nextMonth = addMonths(today, 1)
-                return {
-                    from: startOfMonth(nextMonth),
-                    to: endOfMonth(nextMonth),
-                }
-            }
-            case 'thisYear':
-                return { from: startOfYear(today), to: endOfDay(today) }
-            case 'lastYear': {
-                const lastYear = subYears(today, 1)
-                return { from: startOfYear(lastYear), to: endOfYear(lastYear) }
-            }
-            default:
-                return { from: startOfDay(today), to: endOfDay(today) }
-        }
-    }
-
     const setPreset = (preset: string): void => {
         const range = getPresetRange(preset)
         setRange(range)
     }
 
-    const checkPreset = (): void => {
+    const resetValues = (): void => {
+        setRange({
+            from:
+                typeof initialDateFrom === 'string'
+                    ? getDateAdjustedForTimezone(initialDateFrom)
+                    : initialDateFrom,
+            to: initialDateTo
+                ? typeof initialDateTo === 'string'
+                    ? getDateAdjustedForTimezone(initialDateTo)
+                    : initialDateTo
+                : typeof initialDateFrom === 'string'
+                  ? getDateAdjustedForTimezone(initialDateFrom)
+                  : initialDateFrom,
+        })
+    }
+
+    useEffect(() => {
         for (const preset of PRESETS) {
             const presetRange = getPresetRange(preset.name)
 
@@ -221,26 +237,6 @@ export const DateRangePicker: FC<DateRangePickerProps> = ({
         }
 
         setSelectedPreset(undefined)
-    }
-
-    const resetValues = (): void => {
-        setRange({
-            from:
-                typeof initialDateFrom === 'string'
-                    ? getDateAdjustedForTimezone(initialDateFrom)
-                    : initialDateFrom,
-            to: initialDateTo
-                ? typeof initialDateTo === 'string'
-                    ? getDateAdjustedForTimezone(initialDateTo)
-                    : initialDateTo
-                : typeof initialDateFrom === 'string'
-                  ? getDateAdjustedForTimezone(initialDateFrom)
-                  : initialDateFrom,
-        })
-    }
-
-    useEffect(() => {
-        checkPreset()
     }, [range])
 
     const PresetButton = ({
@@ -259,14 +255,10 @@ export const DateRangePicker: FC<DateRangePickerProps> = ({
                 setPreset(preset)
             }}
         >
-            <>
-                <span
-                    className={cn('pr-2 opacity-0', isSelected && 'opacity-70')}
-                >
-                    <CheckIcon width={18} height={18} />
-                </span>
-                {label}
-            </>
+            <span className={cn('pr-2 opacity-0', isSelected && 'opacity-70')}>
+                <CheckIcon width={18} height={18} />
+            </span>
+            {label}
         </Button>
     )
 
@@ -279,6 +271,7 @@ export const DateRangePicker: FC<DateRangePickerProps> = ({
         )
     }
 
+    // biome-ignore lint/correctness/useExhaustiveDependencies: deliberately snapshots the range only when the popover opens, so it can be compared against the edited range on close; adding `range` would defeat that.
     useEffect(() => {
         if (isOpen) {
             openedRangeRef.current = range
@@ -306,7 +299,7 @@ export const DateRangePicker: FC<DateRangePickerProps> = ({
                         <div className="py-1">
                             <div>{`${formatDate(range.from, locale)}${
                                 range.to != null
-                                    ? ' - ' + formatDate(range.to, locale)
+                                    ? ` - ${formatDate(range.to, locale)}`
                                     : ''
                             }`}</div>
                         </div>

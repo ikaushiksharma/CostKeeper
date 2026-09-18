@@ -1,5 +1,5 @@
 import { Loader2 } from 'lucide-react'
-import { z } from 'zod'
+import type { z } from 'zod'
 
 import {
     Sheet,

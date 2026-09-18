@@ -15,10 +15,17 @@ type SelectedColumnsState = {
     [key: string]: string | null
 }
 
+// Rows are keyed by whichever headers the user mapped, with amount/date
+// normalised for the API. accountId is attached by the caller afterwards.
+export type ImportedTransaction = Record<string, string | number> & {
+    amount: number
+    date: string
+}
+
 type ImportCardProps = {
     data: string[][]
     onCancel: () => void
-    onSubmit: (data: any) => void
+    onSubmit: (data: ImportedTransaction[]) => void
 }
 
 export const ImportCard = ({ data, onCancel, onSubmit }: ImportCardProps) => {
@@ -81,10 +88,10 @@ export const ImportCard = ({ data, onCancel, onSubmit }: ImportCardProps) => {
 
         // convert it to array of objects so that it can be inserted into database.
         const arrayOfData = mappedData.body.map((row) => {
-            return row.reduce((acc: any, cell, index) => {
+            return row.reduce<Record<string, string>>((acc, cell, index) => {
                 const header = mappedData.headers[index]
 
-                if (header !== null) acc[header] = cell
+                if (header !== null && cell !== null) acc[header] = cell
 
                 return acc
             }, {})

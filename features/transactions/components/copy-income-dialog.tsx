@@ -138,6 +138,7 @@ export const CopyIncomeDialog = ({ open, onOpenChange }: Props) => {
                         <div className="space-y-3 py-2">
                             {Array.from({ length: 3 }).map((_, i) => (
                                 <div
+                                    // biome-ignore lint/suspicious/noArrayIndexKey: fixed-length loading placeholders with no identity.
                                     key={i}
                                     className="flex items-center gap-3 rounded-lg border p-3"
                                 >
@@ -161,6 +162,7 @@ export const CopyIncomeDialog = ({ open, onOpenChange }: Props) => {
                         <>
                             {/* Select all toggle */}
                             <button
+                                type="button"
                                 onClick={toggleAll}
                                 className="mb-2 flex w-full items-center gap-2 rounded-md px-1 py-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
                             >
@@ -186,6 +188,7 @@ export const CopyIncomeDialog = ({ open, onOpenChange }: Props) => {
                                         return (
                                             <button
                                                 key={t.id}
+                                                type="button"
                                                 onClick={() => toggleItem(t.id)}
                                                 className={`flex w-full items-center gap-3 rounded-lg border px-3 py-2.5 text-left transition-colors ${
                                                     isSelected
@@ -277,9 +280,7 @@ export const CopyIncomeDialog = ({ open, onOpenChange }: Props) => {
                         ) : (
                             <>
                                 <CopyCheck className="mr-2 size-4" />
-                                Copy {selected.size > 0
-                                    ? selected.size
-                                    : ''}{' '}
+                                Copy {selected.size > 0 ? selected.size : ''}{' '}
                                 {selected.size === 1
                                     ? 'transaction'
                                     : 'transactions'}

@@ -477,14 +477,11 @@ const app = new Hono()
             // Find matching account or use default
             let accountId = defaultAccountId || null
             if (parsed.accountHint) {
+                const accountHint = parsed.accountHint.toLowerCase()
                 const matchingAccount = userAccounts.find(
                     (a) =>
-                        a.name
-                            .toLowerCase()
-                            .includes(parsed.accountHint!.toLowerCase()) ||
-                        parsed
-                            .accountHint!.toLowerCase()
-                            .includes(a.name.toLowerCase())
+                        a.name.toLowerCase().includes(accountHint) ||
+                        accountHint.includes(a.name.toLowerCase())
                 )
                 if (matchingAccount) {
                     accountId = matchingAccount.id
@@ -499,14 +496,11 @@ const app = new Hono()
             // Find matching category or use default
             let categoryId = defaultCategoryId || null
             if (parsed.categoryHint) {
+                const categoryHint = parsed.categoryHint.toLowerCase()
                 const matchingCategory = userCategories.find(
                     (c) =>
-                        c.name
-                            .toLowerCase()
-                            .includes(parsed.categoryHint!.toLowerCase()) ||
-                        parsed
-                            .categoryHint!.toLowerCase()
-                            .includes(c.name.toLowerCase())
+                        c.name.toLowerCase().includes(categoryHint) ||
+                        categoryHint.includes(c.name.toLowerCase())
                 )
                 if (matchingCategory) {
                     categoryId = matchingCategory.id

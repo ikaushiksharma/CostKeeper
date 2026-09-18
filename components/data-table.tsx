@@ -1,10 +1,10 @@
 'use client'
 
 import {
-    ColumnDef,
-    ColumnFiltersState,
-    Row,
-    SortingState,
+    type ColumnDef,
+    type ColumnFiltersState,
+    type Row,
+    type SortingState,
     flexRender,
     getCoreRowModel,
     getFilteredRowModel,
@@ -118,13 +118,14 @@ export function DataTable<TData, TValue>({
         lastItemIndex,
     ])
 
+    const selectedRows = table.getFilteredSelectedRowModel().rows
     const total = React.useMemo(() => {
         if (!amountKey) return null
-        return table.getFilteredSelectedRowModel().rows.reduce((sum, row) => {
+        return selectedRows.reduce((sum, row) => {
             const amount = row.original[amountKey]
             return sum + (typeof amount === 'number' ? amount : 0)
         }, 0)
-    }, [table.getFilteredSelectedRowModel().rows, amountKey])
+    }, [selectedRows, amountKey])
 
     return (
         <div>

@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next'
 import { Inter } from 'next/font/google'
 import type { PropsWithChildren } from 'react'
 import { ClerkProvider } from '@clerk/nextjs'
+import { SerwistProvider } from '@serwist/turbopack/react'
 import { QueryProviders } from '@/providers/query-provider'
 import { SheetProvider } from '@/providers/sheet-provider'
 import './globals.css'
@@ -22,18 +23,24 @@ const RootLayout = ({ children }: Readonly<PropsWithChildren>) => {
         <ClerkProvider>
             <html lang="en">
                 <body className={inter.className}>
-                    <QueryProviders>
-                        <SheetProvider />
-                        <Toaster richColors theme="light" />
-                        <ThemeProvider
-                            attribute="class"
-                            defaultTheme="system"
-                            enableSystem
-                            disableTransitionOnChange
-                        >
-                            {children}
-                        </ThemeProvider>
-                    </QueryProviders>
+                    <SerwistProvider
+                        swUrl="/serwist/sw.js"
+                        cacheOnNavigation
+                        reloadOnOnline
+                    >
+                        <QueryProviders>
+                            <SheetProvider />
+                            <Toaster richColors theme="light" />
+                            <ThemeProvider
+                                attribute="class"
+                                defaultTheme="system"
+                                enableSystem
+                                disableTransitionOnChange
+                            >
+                                {children}
+                            </ThemeProvider>
+                        </QueryProviders>
+                    </SerwistProvider>
                 </body>
             </html>
         </ClerkProvider>

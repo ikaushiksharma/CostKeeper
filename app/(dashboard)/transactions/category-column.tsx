@@ -25,6 +25,7 @@ export const CategoryColumn = ({
 
     return (
         <button
+            type="button"
             onClick={onClick}
             className={cn(
                 'flex items-center cursor-pointer hover:underline',

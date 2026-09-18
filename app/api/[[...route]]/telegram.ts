@@ -2,8 +2,6 @@ import { createId } from '@paralleldrive/cuid2'
 import { eq } from 'drizzle-orm'
 import { Hono } from 'hono'
 import { clerkMiddleware, getAuth } from '@hono/clerk-auth'
-import { zValidator } from '@hono/zod-validator'
-import { z } from 'zod'
 import { db } from '@/db/drizzle'
 import {
     accounts,
@@ -20,7 +18,7 @@ import {
     sendMessage,
     sendInlineKeyboard,
     setWebhook,
-    TelegramCallbackQuery,
+    type TelegramCallbackQuery,
 } from '@/lib/telegram'
 
 const HELP_MESSAGE = `🤑 *Cost Keeper Bot*
@@ -66,7 +64,7 @@ const app = new Hono()
         const { message } = update
         const chatId = message.chat.id
         const telegramId = message.from.id.toString()
-        const text = message.text!.trim()
+        const text = update.message.text.trim()
 
         // Handle commands
         if (text.startsWith('/')) {
@@ -591,12 +589,11 @@ async function handleTransactionMessage(
     // Find matching account or use default from settings
     let accountId = userSettings?.defaultAccountId || null
     if (parsed.accountHint) {
+        const accountHint = parsed.accountHint.toLowerCase()
         const matchingAccount = userAccounts.find(
             (a) =>
-                a.name
-                    .toLowerCase()
-                    .includes(parsed.accountHint!.toLowerCase()) ||
-                parsed.accountHint!.toLowerCase().includes(a.name.toLowerCase())
+                a.name.toLowerCase().includes(accountHint) ||
+                accountHint.includes(a.name.toLowerCase())
         )
         if (matchingAccount) {
             accountId = matchingAccount.id
@@ -615,14 +612,11 @@ async function handleTransactionMessage(
     // Find matching category or use default from settings
     let categoryId = userSettings?.defaultCategoryId || null
     if (parsed.categoryHint) {
+        const categoryHint = parsed.categoryHint.toLowerCase()
         const matchingCategory = userCategories.find(
             (c) =>
-                c.name
-                    .toLowerCase()
-                    .includes(parsed.categoryHint!.toLowerCase()) ||
-                parsed
-                    .categoryHint!.toLowerCase()
-                    .includes(c.name.toLowerCase())
+                c.name.toLowerCase().includes(categoryHint) ||
+                categoryHint.includes(c.name.toLowerCase())
         )
         if (matchingCategory) {
             categoryId = matchingCategory.id

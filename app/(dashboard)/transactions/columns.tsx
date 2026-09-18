@@ -1,14 +1,14 @@
 'use client'
 
-import { ColumnDef } from '@tanstack/react-table'
+import type { ColumnDef } from '@tanstack/react-table'
 import { format } from 'date-fns'
-import { InferResponseType } from 'hono'
+import type { InferResponseType } from 'hono'
 import { ArrowUpDown } from 'lucide-react'
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
-import { client } from '@/lib/hono'
+import type { client } from '@/lib/hono'
 import { formatCurrency } from '@/lib/utils'
 import { AccountColumn } from './account-column'
 import { Actions } from './actions'

@@ -59,9 +59,9 @@ export const RadialVariant = ({ data }: RadialVariantProps) => {
                     content={({ payload }) => {
                         return (
                             <ul className="flex flex-col space-y-2">
-                                {payload?.map((entry, index) => (
+                                {payload?.map((entry) => (
                                     <li
-                                        key={`item-${index}`}
+                                        key={String(entry.value)}
                                         className="flex items-center space-x-2"
                                     >
                                         <span

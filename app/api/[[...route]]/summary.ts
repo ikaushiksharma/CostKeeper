@@ -1,15 +1,9 @@
 import { db } from '@/db/drizzle'
 import { accounts, categories, transactions } from '@/db/schema'
-import { calculatePercentageChange, fillMissingDays } from '@/lib/utils'
+import { fillMissingDays } from '@/lib/utils'
 import { clerkMiddleware, getAuth } from '@hono/clerk-auth'
 import { zValidator } from '@hono/zod-validator'
-import {
-    addDays,
-    differenceInDays,
-    parse,
-    startOfMonth,
-    subDays,
-} from 'date-fns'
+import { parse, startOfMonth } from 'date-fns'
 import { and, desc, eq, gte, lt, lte, sql, sum } from 'drizzle-orm'
 import { Hono } from 'hono'
 import { z } from 'zod'

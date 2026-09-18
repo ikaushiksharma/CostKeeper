@@ -9,7 +9,7 @@ export const useGetLastMonthIncome = (enabled: boolean = false) => {
         enabled,
         queryFn: async () => {
             const response =
-                await client.api.transactions['last-month-income']['$get']()
+                await client.api.transactions['last-month-income'].$get()
 
             if (!response.ok) {
                 throw new Error('Failed to fetch last month income.')

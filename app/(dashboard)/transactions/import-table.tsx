@@ -28,6 +28,7 @@ export const ImportTable = ({
                 <TableHeader className="bg-muted">
                     <TableRow>
                         {headers.map((_header, index) => (
+                            // biome-ignore lint/suspicious/noArrayIndexKey: CSV columns are positional and never reordered; the index is the column identity.
                             <TableHead key={index}>
                                 <TableHeadSelect
                                     columnIndex={index}
@@ -41,9 +42,11 @@ export const ImportTable = ({
 
                 <TableBody>
                     {body.map((row: string[], index) => (
+                        // biome-ignore lint/suspicious/noArrayIndexKey: static CSV preview; rows are never reordered or keyed by content.
                         <TableRow key={index}>
-                            {row.map((cell, index) => (
-                                <TableCell key={index}>{cell}</TableCell>
+                            {row.map((cell, cellIndex) => (
+                                // biome-ignore lint/suspicious/noArrayIndexKey: cells are positional within a fixed row.
+                                <TableCell key={cellIndex}>{cell}</TableCell>
                             ))}
                         </TableRow>
                     ))}

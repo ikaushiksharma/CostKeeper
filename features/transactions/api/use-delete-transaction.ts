@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { InferResponseType } from 'hono'
+import type { InferResponseType } from 'hono'
 import { toast } from 'sonner'
 
 import { client } from '@/lib/hono'
@@ -13,7 +13,7 @@ export const useDeleteTransaction = (id?: string) => {
 
     const mutation = useMutation<ResponseType, Error>({
         mutationFn: async () => {
-            const response = await client.api.transactions[':id']['$delete']({
+            const response = await client.api.transactions[':id'].$delete({
                 param: { id },
             })
 

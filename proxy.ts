@@ -3,8 +3,8 @@ import { NextResponse } from 'next/server'
 
 const isProtectedRoute = createRouteMatcher(['/'])
 
-export default clerkMiddleware((auth, req) => {
-    if (isProtectedRoute(req)) auth().protect()
+export const proxy = clerkMiddleware(async (auth, req) => {
+    if (isProtectedRoute(req)) await auth.protect()
 
     return NextResponse.next()
 })

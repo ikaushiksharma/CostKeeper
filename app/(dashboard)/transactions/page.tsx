@@ -3,11 +3,11 @@
 import { Loader2, Plus, TrendingUp } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { toast } from 'sonner'
+import type { ParseResult } from 'papaparse'
 import { DataTable } from '@/components/data-table'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
-import { transactions as transactionSchema } from '@/db/schema'
 import { useSelectAccount } from '@/features/accounts/hooks/use-select-account'
 import { useBulkCreateTransactions } from '@/features/transactions/api/use-bulk-create-transactions'
 import { useBulkDeleteTransactions } from '@/features/transactions/api/use-bulk-delete-transactions'
@@ -16,7 +16,7 @@ import { CopyIncomeDialog } from '@/features/transactions/components/copy-income
 import { useNewTransaction } from '@/features/transactions/hooks/use-new-transaction'
 
 import { columns } from './columns'
-import { ImportCard } from './import-card'
+import { type ImportedTransaction, ImportCard } from './import-card'
 import { UploadButton } from './upload-button'
 
 enum VARIANTS {
@@ -24,15 +24,9 @@ enum VARIANTS {
     IMPORT = 'IMPORT',
 }
 
-const INITIAL_IMPORT_RESULTS = {
-    data: [],
-    errors: [],
-    meta: [],
-}
-
 const TransactionsPage = () => {
     const [variant, setVariant] = useState<VARIANTS>(VARIANTS.LIST)
-    const [importResults, setImportResults] = useState(INITIAL_IMPORT_RESULTS)
+    const [importResults, setImportResults] = useState<string[][]>([])
     const [copyIncomeOpen, setCopyIncomeOpen] = useState(false)
     const [AccountDialog, confirm] = useSelectAccount()
     const newTransaction = useNewTransaction()
@@ -44,19 +38,17 @@ const TransactionsPage = () => {
         return transactionsQuery.data?.pages.flatMap((page) => page.data) || []
     }, [transactionsQuery.data])
 
-    const onUpload = (results: typeof INITIAL_IMPORT_RESULTS) => {
-        setImportResults(results)
+    const onUpload = (results: ParseResult<string[]>) => {
+        setImportResults(results.data)
         setVariant(VARIANTS.IMPORT)
     }
 
     const onCancelImport = () => {
-        setImportResults(INITIAL_IMPORT_RESULTS)
+        setImportResults([])
         setVariant(VARIANTS.LIST)
     }
 
-    const onSubmitImport = async (
-        values: (typeof transactionSchema.$inferInsert)[]
-    ) => {
+    const onSubmitImport = async (values: ImportedTransaction[]) => {
         const accountId = await confirm()
 
         if (!accountId) {
@@ -68,11 +60,19 @@ const TransactionsPage = () => {
             accountId: accountId as string,
         }))
 
-        createTransactions.mutate(data, {
-            onSuccess: () => {
-                onCancelImport()
-            },
-        })
+        // KNOWN GAP: the CSV mapper can only produce amount/payee/date, but
+        // `/bulk-create` validates against insertTransactionSchema, where
+        // categoryId is notNull. The request is rejected with a 400 until the
+        // importer can supply (or default) a category. Cast preserves the
+        // existing behaviour rather than silently inventing a category.
+        createTransactions.mutate(
+            data as unknown as Parameters<typeof createTransactions.mutate>[0],
+            {
+                onSuccess: () => {
+                    onCancelImport()
+                },
+            }
+        )
     }
 
     const isDisabled =
@@ -100,7 +100,7 @@ const TransactionsPage = () => {
             <>
                 <AccountDialog />
                 <ImportCard
-                    data={importResults.data}
+                    data={importResults}
                     onCancel={onCancelImport}
                     onSubmit={onSubmitImport}
                 />

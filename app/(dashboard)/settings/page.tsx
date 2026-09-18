@@ -1,7 +1,7 @@
 'use client'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
-import React, { useEffect } from 'react'
+import { useEffect } from 'react'
 import { Loader2, SquarePen } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
@@ -46,7 +46,7 @@ const Page = () => {
     useEffect(() => {
         if (settingsQuery.isSuccess)
             form.reset({ dateTimeMode: !!settings?.dateTimeMode })
-    }, [settingsQuery.isSuccess])
+    }, [settingsQuery.isSuccess, settings?.dateTimeMode, form.reset])
 
     if (settingsQuery.isLoading) {
         return (
