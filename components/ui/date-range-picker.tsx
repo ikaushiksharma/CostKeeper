@@ -14,7 +14,12 @@ import {
     SelectValue,
 } from './select'
 import { cn } from '@/lib/utils'
-import { CheckIcon, ChevronDownIcon, ChevronUpIcon } from 'lucide-react'
+import {
+    CalendarIcon,
+    CheckIcon,
+    ChevronDownIcon,
+    ChevronUpIcon,
+} from 'lucide-react'
 import {
     startOfDay,
     endOfDay,
@@ -41,7 +46,7 @@ export interface DateRangePickerProps {
     locale?: string
 }
 
-const formatDate = (date: Date, locale: string = 'en-us'): string => {
+const formatDate = (date: Date, locale: string = 'en-IN'): string => {
     return date.toLocaleDateString(locale, {
         month: 'short',
         day: 'numeric',
@@ -145,7 +150,7 @@ export const DateRangePicker: FC<DateRangePickerProps> = ({
     initialDateTo,
     onUpdate,
     align = 'end',
-    locale = 'en-US',
+    locale = 'en-IN',
 }): React.ReactElement => {
     const [isOpen, setIsOpen] = useState(false)
 
@@ -291,12 +296,13 @@ export const DateRangePicker: FC<DateRangePickerProps> = ({
         >
             <PopoverTrigger asChild>
                 <Button
-                    size={'lg'}
                     variant="outline"
-                    className="lg:w-auto w-full h-9 rounded-md px-3 font-normal bg-white/10 hover:bg-white/30 hover:text-white border-none focus:ring-offset-0 focus:ring-transparent outline-none text-white focus:bg-white/30 transition"
+                    aria-label="Filter by date range"
+                    className="sm:w-auto w-full justify-start gap-2 bg-card font-normal tabular-nums"
                 >
-                    <div className="text-right">
-                        <div className="py-1">
+                    <CalendarIcon className="size-4 text-muted-foreground shrink-0" />
+                    <div className="flex-1 text-left">
+                        <div>
                             <div>{`${formatDate(range.from, locale)}${
                                 range.to != null
                                     ? ` - ${formatDate(range.to, locale)}`
@@ -306,9 +312,9 @@ export const DateRangePicker: FC<DateRangePickerProps> = ({
                     </div>
                     <div>
                         {isOpen ? (
-                            <ChevronUpIcon className="ml-2 size-4 opacity-50" />
+                            <ChevronUpIcon className="size-4 opacity-50" />
                         ) : (
-                            <ChevronDownIcon className="ml-2 size-4 opacity-50" />
+                            <ChevronDownIcon className="size-4 opacity-50" />
                         )}
                     </div>
                 </Button>

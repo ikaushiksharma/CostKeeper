@@ -1,6 +1,6 @@
 'use client'
 
-import { Settings2, Loader2 } from 'lucide-react'
+import { Skeleton } from '@/components/ui/skeleton'
 import {
     Card,
     CardContent,
@@ -36,41 +36,30 @@ export function QuickEntryDefaults() {
         accountsQuery.isLoading ||
         categoriesQuery.isLoading
     const isPending = updateSettingsMutation.isPending
+    const portalTarget = typeof document !== 'undefined' ? document.body : null
 
     return (
-        <Card className="border-none drop-shadow-sm mt-6">
+        <Card>
             <CardHeader>
-                <div className="flex items-center gap-2">
-                    <Settings2 className="size-5 text-blue-500" />
-                    <CardTitle className="text-xl">
-                        Transaction Defaults
-                    </CardTitle>
-                </div>
+                <CardTitle>Transaction defaults</CardTitle>
                 <CardDescription>
-                    Set default account and category for new transactions
+                    Used by Quick Add, the Telegram bot and the new transaction
+                    form whenever you don&apos;t say otherwise.
                 </CardDescription>
             </CardHeader>
             <CardContent>
                 {isLoading ? (
-                    <div className="flex items-center justify-center py-4">
-                        <Loader2 className="size-5 animate-spin text-muted-foreground" />
+                    <div className="grid gap-4 sm:grid-cols-2">
+                        <Skeleton className="h-16" />
+                        <Skeleton className="h-16" />
                     </div>
                 ) : (
-                    <div className="space-y-4">
-                        <p className="text-sm text-muted-foreground">
-                            These defaults are used when adding transactions via
-                            Quick Add on the homepage or the Telegram bot. If
-                            not specified in your message, these will be used
-                            automatically.
-                        </p>
-
+                    <div>
                         <div className="grid gap-4 sm:grid-cols-2">
                             <div className="space-y-2">
-                                <Label htmlFor="default-account">
-                                    Default Account
-                                </Label>
+                                <Label>Default account</Label>
                                 <Select
-                                    menuPortalTarget={document.body}
+                                    menuPortalTarget={portalTarget}
                                     value={settingsQuery.data?.defaultAccountId}
                                     onChange={(value) => {
                                         updateSettingsMutation.mutate({
@@ -78,17 +67,15 @@ export function QuickEntryDefaults() {
                                         })
                                     }}
                                     options={accountOptions}
-                                    placeholder="Select account..."
+                                    placeholder="None"
                                     disabled={isPending}
                                 />
                             </div>
 
                             <div className="space-y-2">
-                                <Label htmlFor="default-category">
-                                    Default Category
-                                </Label>
+                                <Label>Default category</Label>
                                 <Select
-                                    menuPortalTarget={document.body}
+                                    menuPortalTarget={portalTarget}
                                     value={
                                         settingsQuery.data?.defaultCategoryId
                                     }
@@ -98,7 +85,7 @@ export function QuickEntryDefaults() {
                                         })
                                     }}
                                     options={categoryOptions}
-                                    placeholder="Select category..."
+                                    placeholder="None"
                                     disabled={isPending}
                                 />
                             </div>

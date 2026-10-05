@@ -1,92 +1,102 @@
 'use client'
 
-import { Menu } from 'lucide-react'
-import { usePathname, useRouter } from 'next/navigation'
-import { useState } from 'react'
-import { useMedia } from 'react-use'
+import {
+    ArrowLeftRight,
+    LayoutGrid,
+    type LucideIcon,
+    Settings,
+    Shapes,
+    WalletCards,
+} from 'lucide-react'
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 
-import { Button } from '@/components/ui/button'
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
-import { NavButton } from './nav-button'
+import { cn } from '@/lib/utils'
 
-const routes = [
-    {
-        href: '/',
-        label: 'Overview',
-    },
-    {
-        href: '/transactions',
-        label: 'Transactions',
-    },
-    {
-        href: '/accounts',
-        label: 'Accounts',
-    },
-    {
-        href: '/categories',
-        label: 'Categories',
-    },
-    {
-        href: '/settings',
-        label: 'Settings',
-    },
+type Route = { href: string; label: string; icon: LucideIcon }
+
+export const routes: Route[] = [
+    { href: '/', label: 'Overview', icon: LayoutGrid },
+    { href: '/transactions', label: 'Transactions', icon: ArrowLeftRight },
+    { href: '/accounts', label: 'Accounts', icon: WalletCards },
+    { href: '/categories', label: 'Categories', icon: Shapes },
+    { href: '/settings', label: 'Settings', icon: Settings },
 ]
 
+const isActiveRoute = (pathname: string, href: string) =>
+    href === '/' ? pathname === '/' : pathname.startsWith(href)
+
+// Desktop: inline pill nav inside the top bar. Rendered with CSS breakpoints
+// (not a JS media query) so there is no layout flash on first paint.
 export const Navigation = () => {
-    const [isOpen, setIsOpen] = useState(false)
-
-    const router = useRouter()
     const pathname = usePathname()
-    const isMobile = useMedia('(max-width: 1024px)', false)
 
-    const onClick = (href: string) => {
-        router.push(href)
-        setIsOpen(false)
-    }
-    if (isMobile) {
-        return (
-            <Sheet open={isOpen} onOpenChange={setIsOpen}>
-                <SheetTrigger asChild>
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        className="font-normal bg-white/10 hover:bg-white/20 hover:text-white border-none focus-visible:ring-offset-0 focus-visible:ring-transparent outline-none text-white focus:bg-white/30 transition"
-                    >
-                        <Menu className="size-4" />
-                    </Button>
-                </SheetTrigger>
-
-                <SheetContent side="left" className="px-2">
-                    <nav className="flex flex-col gap-y-2 pt-6">
-                        {routes.map((route) => (
-                            <Button
-                                key={route.href}
-                                variant={
-                                    route.href === pathname
-                                        ? 'secondary'
-                                        : 'ghost'
-                                }
-                                onClick={() => onClick(route.href)}
-                                className="w-full justify-start"
-                            >
-                                {route.label}
-                            </Button>
-                        ))}
-                    </nav>
-                </SheetContent>
-            </Sheet>
-        )
-    }
     return (
-        <nav className="hidden lg:flex items-center gap-x-2 overflow-x-auto">
-            {routes.map((route) => (
-                <NavButton
-                    key={route.href}
-                    label={route.label}
-                    href={route.href}
-                    isActive={route.href === pathname}
-                />
-            ))}
+        <nav aria-label="Main" className="hidden md:flex items-center gap-1">
+            {routes.map((route) => {
+                const active = isActiveRoute(pathname, route.href)
+                return (
+                    <Link
+                        key={route.href}
+                        href={route.href}
+                        aria-current={active ? 'page' : undefined}
+                        className={cn(
+                            'h-9 rounded-full px-3.5 inline-flex items-center text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                            active
+                                ? 'bg-primary text-primary-foreground'
+                                : 'text-muted-foreground hover:text-foreground hover:bg-accent'
+                        )}
+                    >
+                        {route.label}
+                    </Link>
+                )
+            })}
+        </nav>
+    )
+}
+
+// Mobile: fixed bottom tab bar, every destination one thumb-tap away.
+export const MobileNavigation = () => {
+    const pathname = usePathname()
+
+    return (
+        <nav
+            aria-label="Main"
+            className="md:hidden fixed inset-x-0 bottom-0 z-40 border-t bg-background/90 backdrop-blur-lg pb-[env(safe-area-inset-bottom)]"
+        >
+            <ul className="grid grid-cols-5">
+                {routes.map((route) => {
+                    const active = isActiveRoute(pathname, route.href)
+                    const Icon = route.icon
+                    return (
+                        <li key={route.href}>
+                            <Link
+                                href={route.href}
+                                aria-current={active ? 'page' : undefined}
+                                className={cn(
+                                    'flex h-16 flex-col items-center justify-center gap-1 text-[11px] font-medium transition-colors',
+                                    active
+                                        ? 'text-foreground'
+                                        : 'text-muted-foreground'
+                                )}
+                            >
+                                <span
+                                    className={cn(
+                                        'flex h-7 w-12 items-center justify-center rounded-full transition-colors',
+                                        active && 'bg-brand-soft text-brand'
+                                    )}
+                                >
+                                    <Icon
+                                        className="size-[18px]"
+                                        strokeWidth={2}
+                                    />
+                                </span>
+                                {route.label}
+                            </Link>
+                        </li>
+                    )
+                })}
+            </ul>
         </nav>
     )
 }

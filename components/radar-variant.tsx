@@ -16,16 +16,28 @@ type RadarVariantProps = {
 
 export const RadarVariant = ({ data }: RadarVariantProps) => {
     return (
-        <ResponsiveContainer width="100%" height={350}>
+        <ResponsiveContainer width="100%" height={320}>
             <RadarChart cx="50%" cy="50%" outerRadius="60%" data={data}>
-                <PolarGrid />
-                <PolarAngleAxis style={{ fontSize: '12px' }} dataKey="name" />
-                <PolarRadiusAxis style={{ fontSize: '12px' }} />
+                <PolarGrid stroke="hsl(var(--border))" />
+                <PolarAngleAxis
+                    dataKey="name"
+                    tick={{
+                        fill: 'hsl(var(--muted-foreground))',
+                        fontSize: 12,
+                    }}
+                />
+                <PolarRadiusAxis
+                    tick={{
+                        fill: 'hsl(var(--muted-foreground))',
+                        fontSize: 11,
+                    }}
+                    axisLine={false}
+                />
                 <Radar
                     dataKey="value"
-                    stroke="#3d82f6"
-                    fill="#3d82f6"
-                    fillOpacity={0.6}
+                    stroke="hsl(var(--brand))"
+                    fill="hsl(var(--brand))"
+                    fillOpacity={0.25}
                 />
             </RadarChart>
         </ResponsiveContainer>

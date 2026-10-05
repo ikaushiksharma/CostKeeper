@@ -1,6 +1,12 @@
 import { useState } from 'react'
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 
 import { ImportTable } from './import-table'
@@ -111,41 +117,39 @@ export const ImportCard = ({ data, onCancel, onSubmit }: ImportCardProps) => {
     }
 
     return (
-        <div className="max-w-screen-2xl mx-auto w-full pb-10 -mt-6">
-            <Card className="border-none drop-shadow-sm">
-                <CardHeader className="gap-y-2 lg:flex-row lg:items-center lg:justify-between">
-                    <CardTitle className="text-xl line-clamp-1">
-                        Import Transaction
-                    </CardTitle>
+        <Card>
+            <CardHeader className="gap-4 lg:flex-row lg:items-center lg:justify-between lg:space-y-0">
+                <div className="space-y-1.5">
+                    <CardTitle>Map your CSV columns</CardTitle>
+                    <CardDescription>
+                        Use the menu above each column to mark which one holds
+                        the date, payee and amount. Leave the rest as Skip.
+                    </CardDescription>
+                </div>
 
-                    <div className="flex flex-col lg:flex-row gap-y-2 items-center gap-x-2">
-                        <Button
-                            size="sm"
-                            onClick={onCancel}
-                            className="w-full lg:w-auto"
-                        >
-                            Cancel
-                        </Button>
-                        <Button
-                            size="sm"
-                            disabled={progress < requiredOptions.length}
-                            onClick={handleContinue}
-                            className="w-full lg:w-auto"
-                        >
-                            Continue ({progress}/{requiredOptions.length})
-                        </Button>
-                    </div>
-                </CardHeader>
+                <div className="flex flex-col-reverse gap-2 sm:flex-row sm:items-center">
+                    <Button size="sm" variant="ghost" onClick={onCancel}>
+                        Cancel
+                    </Button>
+                    <Button
+                        size="sm"
+                        disabled={progress < requiredOptions.length}
+                        onClick={handleContinue}
+                        className="tabular-nums"
+                    >
+                        Continue ({progress}/{requiredOptions.length} mapped)
+                    </Button>
+                </div>
+            </CardHeader>
 
-                <CardContent>
-                    <ImportTable
-                        headers={headers}
-                        body={body}
-                        selectedColumns={selectedColumns}
-                        onTableHeadSelectChange={onTableHeadSelectChange}
-                    />
-                </CardContent>
-            </Card>
-        </div>
+            <CardContent>
+                <ImportTable
+                    headers={headers}
+                    body={body}
+                    selectedColumns={selectedColumns}
+                    onTableHeadSelectChange={onTableHeadSelectChange}
+                />
+            </CardContent>
+        </Card>
     )
 }

@@ -4,10 +4,8 @@ import { QuickTransactionEntry } from '@/components/quick-transaction-entry'
 
 export default function Home() {
     return (
-        <div className="max-w-screen-2xl mx-auto w-full pb-10 -mt-6">
-            <div className="mb-4">
-                <QuickTransactionEntry />
-            </div>
+        <div className="space-y-4 lg:space-y-6">
+            <QuickTransactionEntry />
             <DataGrid />
             <DataCharts />
         </div>

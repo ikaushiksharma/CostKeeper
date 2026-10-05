@@ -1,11 +1,11 @@
 'use client'
 
-import { Loader2, Plus } from 'lucide-react'
+import { Plus, Shapes } from 'lucide-react'
 
 import { DataTable } from '@/components/data-table'
+import { EmptyState } from '@/components/empty-state'
+import { ListCard, ListCardSkeleton } from '@/components/list-card'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Skeleton } from '@/components/ui/skeleton'
 import { useBulkDeleteCategories } from '@/features/categories/api/use-bulk-delete-categories'
 import { useGetCategories } from '@/features/categories/api/use-get-categories'
 import { useNewCategory } from '@/features/categories/hooks/use-new-category'
@@ -21,51 +21,44 @@ const CategoriesPage = () => {
     const isDisabled = categoriesQuery.isLoading || deleteCategories.isPending
 
     if (categoriesQuery.isLoading) {
-        return (
-            <div className="max-w-screen-2xl mx-auto w-full pb-10 -mt-6">
-                <Card className="border-none drop-shadow-sm">
-                    <CardHeader>
-                        <Skeleton className="h-8 w-48" />
-                    </CardHeader>
-
-                    <CardContent>
-                        <div className="h-[500px] w-full flex items-center justify-center">
-                            <Loader2 className="size-6 text-slate-300 animate-spin" />
-                        </div>
-                    </CardContent>
-                </Card>
-            </div>
-        )
+        return <ListCardSkeleton rows={6} />
     }
 
     return (
-        <div className="max-w-screen-2xl mx-auto w-full pb-10 -mt-6">
-            <Card className="border-none drop-shadow-sm">
-                <CardHeader className="gap-y-2 lg:flex-row lg:items-center lg:justify-between">
-                    <CardTitle className="text-xl line-clamp-1">
-                        Categories Page
-                    </CardTitle>
+        <ListCard
+            title="Your categories"
+            count={categories.length}
+            actions={
+                <Button size="sm" onClick={newCategory.onOpen}>
+                    <Plus className="size-4" /> New category
+                </Button>
+            }
+        >
+            <DataTable
+                filterKey="name"
+                filterPlaceholder="Search categories"
+                columns={columns}
+                data={categories}
+                onDelete={(row) => {
+                    const ids = row.map((r) => r.original.id)
 
-                    <Button size="sm" onClick={newCategory.onOpen}>
-                        <Plus className="size-4 mr-2" /> Add new
-                    </Button>
-                </CardHeader>
-
-                <CardContent>
-                    <DataTable
-                        filterKey="name"
-                        columns={columns}
-                        data={categories}
-                        onDelete={(row) => {
-                            const ids = row.map((r) => r.original.id)
-
-                            deleteCategories.mutate({ ids })
-                        }}
-                        disabled={isDisabled}
+                    deleteCategories.mutate({ ids })
+                }}
+                disabled={isDisabled}
+                emptyState={
+                    <EmptyState
+                        icon={Shapes}
+                        title="No categories yet"
+                        description="Create a few, like Food, Rent or Travel, to see where your money goes."
+                        action={
+                            <Button size="sm" onClick={newCategory.onOpen}>
+                                <Plus className="size-4" /> New category
+                            </Button>
+                        }
                     />
-                </CardContent>
-            </Card>
-        </div>
+                }
+            />
+        </ListCard>
     )
 }
 

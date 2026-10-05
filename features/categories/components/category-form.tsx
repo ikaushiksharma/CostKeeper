@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Trash } from 'lucide-react'
+import { Trash2 } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import type { z } from 'zod'
 
@@ -86,9 +86,9 @@ export const CategoryForm = ({
                         disabled={disabled}
                         onClick={handleDelete}
                         className="w-full"
-                        variant="outline"
+                        variant="destructive-ghost"
                     >
-                        <Trash className="size-4 mr-2" />
+                        <Trash2 className="size-4" />
                         Delete category
                     </Button>
                 )}

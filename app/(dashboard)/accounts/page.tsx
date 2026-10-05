@@ -1,10 +1,10 @@
 'use client'
-import { Loader2, Plus } from 'lucide-react'
+import { Plus, WalletCards } from 'lucide-react'
 
 import { DataTable } from '@/components/data-table'
+import { EmptyState } from '@/components/empty-state'
+import { ListCard, ListCardSkeleton } from '@/components/list-card'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Skeleton } from '@/components/ui/skeleton'
 import { useBulkDeleteAccounts } from '@/features/accounts/api/use-bulk-delete-accounts'
 import { useGetAccounts } from '@/features/accounts/api/use-get-accounts'
 import { useNewAccount } from '@/features/accounts/hooks/use-new-account'
@@ -20,50 +20,44 @@ const AccountsPage = () => {
     const isDisabled = accountsQuery.isLoading || deleteAccounts.isPending
 
     if (accountsQuery.isLoading) {
-        return (
-            <div className="max-w-screen-2xl mx-auto w-full pb-10 -mt-6">
-                <Card className="border-none drop-shadow-sm">
-                    <CardHeader>
-                        <Skeleton className="h-8 w-48" />
-                    </CardHeader>
-
-                    <CardContent>
-                        <div className="h-[500px] w-full flex items-center justify-center">
-                            <Loader2 className="size-6 text-slate-300 animate-spin" />
-                        </div>
-                    </CardContent>
-                </Card>
-            </div>
-        )
+        return <ListCardSkeleton rows={5} />
     }
 
     return (
-        <div className="max-w-screen-2xl mx-auto w-full pb-10 -mt-6">
-            <Card className="border-none drop-shadow-sm">
-                <CardHeader className="gap-y-2 lg:flex-row lg:items-center lg:justify-between">
-                    <CardTitle className="text-xl line-clamp-1">
-                        Accounts Page
-                    </CardTitle>
+        <ListCard
+            title="Your accounts"
+            count={accounts.length}
+            actions={
+                <Button size="sm" onClick={newAccount.onOpen}>
+                    <Plus className="size-4" /> New account
+                </Button>
+            }
+        >
+            <DataTable
+                filterKey="name"
+                filterPlaceholder="Search accounts"
+                columns={columns}
+                data={accounts}
+                onDelete={(row) => {
+                    const ids = row.map((r) => r.original.id)
 
-                    <Button size="sm" onClick={newAccount.onOpen}>
-                        <Plus className="size-4 mr-2" /> Add new
-                    </Button>
-                </CardHeader>
-                <CardContent>
-                    <DataTable
-                        filterKey="name"
-                        columns={columns}
-                        data={accounts}
-                        onDelete={(row) => {
-                            const ids = row.map((r) => r.original.id)
-
-                            deleteAccounts.mutate({ ids })
-                        }}
-                        disabled={isDisabled}
+                    deleteAccounts.mutate({ ids })
+                }}
+                disabled={isDisabled}
+                emptyState={
+                    <EmptyState
+                        icon={WalletCards}
+                        title="No accounts yet"
+                        description="Add the places your money lives, like a bank account, cash or a credit card."
+                        action={
+                            <Button size="sm" onClick={newAccount.onOpen}>
+                                <Plus className="size-4" /> New account
+                            </Button>
+                        }
                     />
-                </CardContent>
-            </Card>
-        </div>
+                }
+            />
+        </ListCard>
     )
 }
 

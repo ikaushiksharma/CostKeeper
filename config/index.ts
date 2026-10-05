@@ -6,8 +6,16 @@ import type { Metadata } from 'next'
 
 export const siteConfig: Metadata = {
     title: 'CostKeeper',
+    applicationName: 'CostKeeper',
     description: 'Track your income and expenses with CostKeeper.',
     manifest: '/manifest.json',
+    appleWebApp: {
+        capable: true,
+        title: 'CostKeeper',
+        statusBarStyle: 'default',
+    },
+    // iOS otherwise turns long rupee amounts into tappable phone numbers.
+    formatDetection: { telephone: false },
     keywords: [
         'reactjs',
         'nextjs',

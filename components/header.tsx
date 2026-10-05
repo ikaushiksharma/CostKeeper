@@ -1,51 +1,51 @@
 import { ClerkLoaded, ClerkLoading, UserButton } from '@clerk/nextjs'
-import { Loader2 } from 'lucide-react'
-import { HeaderLogo } from './header-logo'
-import { Navigation } from './navigation'
-import { WelcomeMsg } from './welcome-msg'
-import { Filters } from './filters'
-import Image from 'next/image'
+import { Github } from 'lucide-react'
 import Link from 'next/link'
+
+import { Button } from '@/components/ui/button'
+import { Skeleton } from '@/components/ui/skeleton'
 import { links } from '@/config'
+import { Logo } from './logo'
+import { Navigation } from './navigation'
 import { ThemeToggle } from './theme-toggle'
+
 export const Header = () => {
     return (
-        <header className="bg-gradient-to-b from-blue-700 to-blue-500 px-4 py-8 lg:px-14 lg:pb-20">
-            <div className="max-w-screen-2xl mx-auto">
-                <div className="w-full flex items-center justify-between mb-14">
-                    <div className="flex items-center lg:gap-x-16">
-                        <HeaderLogo />
-                        <Navigation />
-                    </div>
+        <header className="sticky top-0 z-40 border-b bg-background/80 backdrop-blur-lg">
+            <div className="mx-auto flex h-16 max-w-screen-2xl items-center justify-between gap-4 px-4 lg:px-8">
+                <div className="flex items-center gap-8">
+                    <Logo />
+                    <Navigation />
+                </div>
 
-                    <div className="flex items-center gap-x-2">
-                        <ThemeToggle />
-
-                        <ClerkLoaded>
-                            <UserButton />
-                        </ClerkLoaded>
-
-                        <ClerkLoading>
-                            <Loader2 className="size-8 animate-spin text-slate-400" />
-                        </ClerkLoading>
-
+                <div className="flex items-center gap-1">
+                    <Button
+                        asChild
+                        variant="ghost"
+                        size="icon"
+                        className="hidden sm:inline-flex rounded-full size-9"
+                    >
                         <Link
                             href={links.sourceCode}
                             target="_blank"
                             rel="noreferrer noopener"
-                            title="Source Code"
+                            aria-label="Source code on GitHub"
                         >
-                            <Image
-                                src="/github.svg"
-                                alt="GitHub"
-                                height={24}
-                                width={24}
-                            />
+                            <Github className="size-[18px]" />
                         </Link>
+                    </Button>
+
+                    <ThemeToggle />
+
+                    <div className="ml-1 flex size-8 items-center justify-center">
+                        <ClerkLoaded>
+                            <UserButton />
+                        </ClerkLoaded>
+                        <ClerkLoading>
+                            <Skeleton className="size-7 rounded-full" />
+                        </ClerkLoading>
                     </div>
                 </div>
-                <WelcomeMsg />
-                <Filters />
             </div>
         </header>
     )

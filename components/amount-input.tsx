@@ -1,12 +1,6 @@
+import { useEffect, useState } from 'react'
 import CurrencyInput from 'react-currency-input-field'
-import { Info, MinusCircle, PlusCircle } from 'lucide-react'
 
-import {
-    Tooltip,
-    TooltipContent,
-    TooltipProvider,
-    TooltipTrigger,
-} from '@/components/ui/tooltip'
 import { cn } from '@/lib/utils'
 
 type AmountInputProps = {
@@ -14,73 +8,103 @@ type AmountInputProps = {
     onChange: (value: string | undefined) => void
     placeholder?: string
     disabled?: boolean
+    id?: string
 }
 
+type Kind = 'expense' | 'income'
+
+// The amount is stored signed (negative = expense). Instead of asking people
+// to type a minus sign, the sign is picked with an explicit toggle and the
+// field only ever shows the absolute value. New entries default to expense,
+// which is what most entries are.
 export const AmountInput = ({
     value,
     onChange,
     placeholder,
     disabled,
+    id,
 }: AmountInputProps) => {
-    const parsedValue = parseFloat(value)
-    const isIncome = parsedValue > 0
-    const isExpense = parsedValue < 0
+    const parsed = Number.parseFloat(value)
+    const [kind, setKind] = useState<Kind>(parsed > 0 ? 'income' : 'expense')
 
-    const onReverseValue = () => {
-        if (!value) return
+    // Follow the sign when the value arrives from outside (edit sheet load).
+    useEffect(() => {
+        if (parsed > 0) setKind('income')
+        else if (parsed < 0) setKind('expense')
+    }, [parsed])
 
-        const reversedValue = parseFloat(value) * -1
-        onChange(reversedValue.toString())
+    const absolute = value ? value.replace(/^-/, '') : ''
+
+    const emit = (raw: string | undefined, nextKind: Kind) => {
+        if (!raw) return onChange(raw)
+        onChange(nextKind === 'expense' ? `-${raw}` : raw)
+    }
+
+    const switchKind = (nextKind: Kind) => {
+        setKind(nextKind)
+        emit(absolute, nextKind)
     }
 
     return (
-        <div className="relative">
-            <TooltipProvider>
-                <Tooltip delayDuration={100}>
-                    <TooltipTrigger asChild>
+        <div className="space-y-2">
+            <div
+                role="radiogroup"
+                aria-label="Transaction type"
+                className="grid grid-cols-2 gap-1 rounded-md bg-muted p-1"
+            >
+                {(['expense', 'income'] as const).map((option) => {
+                    const active = kind === option
+                    return (
+                        // biome-ignore lint/a11y/useSemanticElements: styled radio group built from buttons.
                         <button
+                            key={option}
                             type="button"
-                            onClick={onReverseValue}
+                            role="radio"
+                            aria-checked={active}
+                            disabled={disabled}
+                            onClick={() => switchKind(option)}
                             className={cn(
-                                'bg-slate-400 hover:bg-slate-500 absolute top-1.5 left-1.5 rounded-md p-2 flex items-center justify-center transition',
-                                isIncome &&
-                                    'bg-emerald-500 hover:bg-emerald-600',
-                                isExpense && 'bg-rose-500 hover:bg-rose-600'
+                                'h-8 rounded-[7px] text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50',
+                                active
+                                    ? 'bg-card shadow-sm'
+                                    : 'text-muted-foreground hover:text-foreground',
+                                active &&
+                                    (option === 'expense'
+                                        ? 'text-expense'
+                                        : 'text-income')
                             )}
                         >
-                            {!parsedValue && (
-                                <Info className="size-3 text-white" />
-                            )}
-                            {isIncome && (
-                                <PlusCircle className="size-3 text-white" />
-                            )}
-                            {isExpense && (
-                                <MinusCircle className="size-3 text-white" />
-                            )}
+                            {option === 'expense' ? 'Expense' : 'Income'}
                         </button>
-                    </TooltipTrigger>
+                    )
+                })}
+            </div>
 
-                    <TooltipContent>
-                        Use [+] for income and [-] for expenses
-                    </TooltipContent>
-                </Tooltip>
-            </TooltipProvider>
-
-            <CurrencyInput
-                prefix="₹"
-                className="pl-10 flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                placeholder={placeholder}
-                value={value}
-                decimalScale={2}
-                decimalsLimit={2}
-                onValueChange={onChange}
-                disabled={disabled}
-            />
-
-            <p className="text-xs text-muted-foreground mt-2">
-                {isIncome && 'This will count as an income.'}
-                {isExpense && 'This will count as an expense.'}
-            </p>
+            <div className="relative">
+                <span
+                    className={cn(
+                        'pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 font-mono text-lg',
+                        kind === 'expense' ? 'text-expense' : 'text-income'
+                    )}
+                    aria-hidden
+                >
+                    {kind === 'expense' ? '−' : '+'}
+                </span>
+                <CurrencyInput
+                    id={id}
+                    prefix="₹"
+                    inputMode="decimal"
+                    allowNegativeValue={false}
+                    className="flex h-12 w-full rounded-md border border-input bg-card pl-8 pr-3 font-mono text-lg tabular-nums ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    placeholder={placeholder}
+                    value={absolute}
+                    decimalScale={2}
+                    decimalsLimit={2}
+                    intlConfig={{ locale: 'en-IN', currency: 'INR' }}
+                    onValueChange={(raw) => emit(raw, kind)}
+                    disabled={disabled}
+                />
+            </div>
         </div>
     )
 }

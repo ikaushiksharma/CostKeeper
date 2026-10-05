@@ -18,13 +18,9 @@ export const UploadButton = ({ onUpload }: UploadButtonProps) => {
             }: {
                 getRootProps: () => Record<string, unknown>
             }) => (
-                <Button
-                    size="sm"
-                    className="w-full lg:w-auto"
-                    {...getRootProps()}
-                >
-                    <Upload className="size-4 mr-2" />
-                    Import
+                <Button size="sm" variant="outline" {...getRootProps()}>
+                    <Upload className="size-4" />
+                    Import CSV
                 </Button>
             )}
         </CSVReader>

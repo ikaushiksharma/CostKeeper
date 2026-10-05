@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useAuth } from '@clerk/nextjs'
-import { Copy, Check, MessageCircle, RefreshCw } from 'lucide-react'
+import { Check, Copy, Link2, Loader2, RefreshCw, Send } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
     Card,
@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { toast } from 'sonner'
+import { cn } from '@/lib/utils'
 
 export function TelegramSettings() {
     const { userId } = useAuth()
@@ -43,7 +44,7 @@ export function TelegramSettings() {
 
             const data = await response.json()
             setLinkCode(data.linkCode)
-            toast.success('Link code generated! Valid for 10 minutes.')
+            toast.success('Link code ready. It works for 10 minutes.')
         } catch (error) {
             console.error('Error generating link code:', error)
             toast.error('Failed to generate link code')
@@ -56,106 +57,135 @@ export function TelegramSettings() {
         if (!linkCode) return
 
         const command = `/link ${linkCode}`
-        await navigator.clipboard.writeText(command)
+        try {
+            await navigator.clipboard.writeText(command)
+        } catch {
+            toast.error(
+                "Couldn't copy. Select the command and copy it by hand."
+            )
+            return
+        }
         setCopied(true)
-        toast.success('Copied to clipboard!')
+        toast.success('Command copied.')
         setTimeout(() => setCopied(false), 2000)
     }
 
+    const steps = [
+        'Open the CostKeeper bot in Telegram. Ask your admin for its username.',
+        'Generate a link code below and copy the command.',
+        'Send the command to the bot. The code works for 10 minutes.',
+        'Message the bot whenever you spend or receive money.',
+    ]
+
+    const examples = [
+        { message: 'Spent 450 on groceries', result: '₹450 expense' },
+        { message: 'Chai at Tapri 60', result: '₹60 expense, payee Tapri' },
+        { message: 'Received 72000 salary', result: '₹72,000 income' },
+    ]
+
     return (
-        <Card className="border-none drop-shadow-sm mt-6">
+        <Card>
             <CardHeader>
                 <div className="flex items-center gap-2">
-                    <MessageCircle className="size-5 text-blue-500" />
-                    <CardTitle className="text-xl">
-                        Telegram Integration
-                    </CardTitle>
+                    <Send className="size-4 text-muted-foreground" />
+                    <CardTitle>Telegram</CardTitle>
                 </div>
                 <CardDescription>
-                    Add transactions directly from Telegram by linking your
-                    account
+                    Add transactions by messaging a bot, without opening the
+                    app.
                 </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-6">
+                <ol className="space-y-3">
+                    {steps.map((step, i) => (
+                        <li key={step} className="flex gap-3 text-sm">
+                            <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-medium tabular-nums">
+                                {i + 1}
+                            </span>
+                            <span className="pt-0.5 text-muted-foreground">
+                                {step}
+                            </span>
+                        </li>
+                    ))}
+                </ol>
+
+                <div className="space-y-3 rounded-md border bg-muted/40 p-4">
+                    {linkCode ? (
+                        <>
+                            <div className="flex items-center gap-2">
+                                <Input
+                                    readOnly
+                                    aria-label="Link command"
+                                    value={`/link ${linkCode}`}
+                                    className="font-mono text-sm"
+                                    onFocus={(e) => e.currentTarget.select()}
+                                />
+                                <Button
+                                    variant="outline"
+                                    onClick={copyToClipboard}
+                                    className="shrink-0"
+                                >
+                                    {copied ? (
+                                        <Check className="size-4 text-income" />
+                                    ) : (
+                                        <Copy className="size-4" />
+                                    )}
+                                    {copied ? 'Copied' : 'Copy'}
+                                </Button>
+                            </div>
+                            <div className="flex items-center justify-between gap-2">
+                                <p className="text-xs text-muted-foreground">
+                                    Expires in 10 minutes.
+                                </p>
+                                <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    onClick={generateLinkCode}
+                                    disabled={isGenerating}
+                                >
+                                    <RefreshCw
+                                        className={cn(
+                                            'size-3.5',
+                                            isGenerating && 'animate-spin'
+                                        )}
+                                    />
+                                    New code
+                                </Button>
+                            </div>
+                        </>
+                    ) : (
+                        <Button
+                            onClick={generateLinkCode}
+                            disabled={isGenerating}
+                            className="w-full sm:w-auto"
+                        >
+                            {isGenerating ? (
+                                <Loader2 className="size-4 animate-spin" />
+                            ) : (
+                                <Link2 className="size-4" />
+                            )}
+                            Generate link code
+                        </Button>
+                    )}
+                </div>
+
                 <div className="space-y-2">
-                    <h4 className="text-sm font-medium">How to connect:</h4>
-                    <ol className="text-sm text-muted-foreground space-y-1 list-decimal list-inside">
-                        <li>
-                            Search for your bot on Telegram (ask your admin for
-                            the bot username)
-                        </li>
-                        <li>Click &quot;Generate Link Code&quot; below</li>
-                        <li>
-                            Send the{' '}
-                            <code className="bg-muted px-1 rounded">/link</code>{' '}
-                            command with the code to the bot
-                        </li>
-                        <li>Start adding transactions by sending messages!</li>
-                    </ol>
-                </div>
-
-                <div className="space-y-3">
-                    <Button
-                        onClick={generateLinkCode}
-                        disabled={isGenerating}
-                        variant="outline"
-                        className="w-full sm:w-auto"
-                    >
-                        {isGenerating ? (
-                            <RefreshCw className="size-4 mr-2 animate-spin" />
-                        ) : (
-                            <RefreshCw className="size-4 mr-2" />
-                        )}
-                        Generate Link Code
-                    </Button>
-
-                    {linkCode && (
-                        <div className="flex items-center gap-2">
-                            <Input
-                                readOnly
-                                value={`/link ${linkCode}`}
-                                className="font-mono text-sm"
-                            />
-                            <Button
-                                size="icon"
-                                variant="outline"
-                                onClick={copyToClipboard}
+                    <h3 className="text-sm font-medium">Things you can send</h3>
+                    <ul className="divide-y rounded-md border text-sm">
+                        {examples.map((example) => (
+                            <li
+                                key={example.message}
+                                className="flex flex-col gap-0.5 px-3 py-2.5 sm:flex-row sm:items-center sm:justify-between"
                             >
-                                {copied ? (
-                                    <Check className="size-4 text-green-500" />
-                                ) : (
-                                    <Copy className="size-4" />
-                                )}
-                            </Button>
-                        </div>
-                    )}
-
-                    {linkCode && (
-                        <p className="text-xs text-muted-foreground">
-                            This code expires in 10 minutes. Copy the command
-                            and send it to the Telegram bot.
-                        </p>
-                    )}
-                </div>
-
-                <div className="pt-4 border-t">
-                    <h4 className="text-sm font-medium mb-2">
-                        Example messages:
-                    </h4>
-                    <div className="text-sm text-muted-foreground space-y-1">
-                        <p>
-                            &quot;Spent 50 on groceries&quot; → Adds Rs 50
-                            expense
-                        </p>
-                        <p>
-                            &quot;Coffee at Starbucks 5.50&quot; → Adds Rs 5.50
-                            expense for payee
-                        </p>
-                        <p>
-                            &quot;Received 1000 salary&quot; → Adds Rs 1000
-                            income
-                        </p>
-                    </div>
+                                <span className="font-mono text-[13px]">
+                                    {example.message}
+                                </span>
+                                <span className="text-muted-foreground">
+                                    {example.result}
+                                </span>
+                            </li>
+                        ))}
+                    </ul>
                 </div>
             </CardContent>
         </Card>

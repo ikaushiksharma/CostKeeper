@@ -28,11 +28,13 @@ export const CategoryColumn = ({
             type="button"
             onClick={onClick}
             className={cn(
-                'flex items-center cursor-pointer hover:underline',
-                !category && 'text-rose-500'
+                'inline-flex h-7 items-center gap-1.5 rounded-full border px-2.5 text-xs font-medium transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                !category &&
+                    'border-expense/30 bg-expense/5 text-expense hover:bg-expense/10'
             )}
+            title={category ? `Edit ${category}` : 'Assign a category'}
         >
-            {!category && <TriangleAlert className="mr-2 size-4 shrink-0" />}
+            {!category && <TriangleAlert className="size-3.5 shrink-0" />}
             {category || 'Uncategorized'}
         </button>
     )

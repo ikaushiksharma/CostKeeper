@@ -27,8 +27,9 @@ export const EditCategorySheet = () => {
     const { isOpen, onClose, id } = useOpenCategory()
 
     const [ConfirmDialog, confirm] = useConfirm(
-        'Are you sure?',
-        'You are about to delete this category.'
+        'Delete this category?',
+        'Transactions in it will become uncategorized.',
+        { confirmLabel: 'Delete', destructive: true }
     )
 
     const categoryQuery = useGetCategory(id)
@@ -73,7 +74,7 @@ export const EditCategorySheet = () => {
             <Sheet open={isOpen || isPending} onOpenChange={onClose}>
                 <SheetContent className="space-y-4">
                     <SheetHeader>
-                        <SheetTitle>Edit Category</SheetTitle>
+                        <SheetTitle>Edit category</SheetTitle>
 
                         <SheetDescription>
                             Edit an existing category.

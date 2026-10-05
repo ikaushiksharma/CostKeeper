@@ -1,7 +1,13 @@
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
 import { NextResponse } from 'next/server'
 
-const isProtectedRoute = createRouteMatcher(['/'])
+const isProtectedRoute = createRouteMatcher([
+    '/',
+    '/transactions(.*)',
+    '/accounts(.*)',
+    '/categories(.*)',
+    '/settings(.*)',
+])
 
 export const proxy = clerkMiddleware(async (auth, req) => {
     if (isProtectedRoute(req)) await auth.protect()
@@ -10,5 +16,7 @@ export const proxy = clerkMiddleware(async (auth, req) => {
 })
 
 export const config = {
-    matcher: ['/((?!.+.[w]+$|_next).*)', '/', '/(api|trpc)(.*)'],
+    // Skip Next internals and static files (manifest, icons, service worker),
+    // so Clerk never redirects a PWA asset request to its handshake.
+    matcher: ['/((?!.+\\.[\\w]+$|_next).*)', '/', '/(api|trpc)(.*)'],
 }

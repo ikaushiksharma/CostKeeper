@@ -1,132 +1,84 @@
 'use client'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
-import { useEffect } from 'react'
-import { Loader2, SquarePen } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { Clock } from 'lucide-react'
+import { useId } from 'react'
+
+import { QuickEntryDefaults } from '@/components/quick-entry-defaults'
+import { TelegramSettings } from '@/components/telegram-settings'
 import {
-    Form,
-    FormControl,
-    FormDescription,
-    FormField,
-    FormItem,
-    FormLabel,
-} from '@/components/ui/form'
-import { useForm } from 'react-hook-form'
-import { z } from 'zod'
-import { zodResolver } from '@hookform/resolvers/zod'
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from '@/components/ui/card'
+import { Label } from '@/components/ui/label'
+import { Skeleton } from '@/components/ui/skeleton'
 import { Switch } from '@/components/ui/switch'
 import { useGetSettings } from '@/features/settings/api/use-get-settings'
-import { Skeleton } from '@/components/ui/skeleton'
 import { useUpdateSettings } from '@/features/settings/api/use-update-settings'
-import { TelegramSettings } from '@/components/telegram-settings'
-import { QuickEntryDefaults } from '@/components/quick-entry-defaults'
 
-const formSchema = z.object({
-    dateTimeMode: z.boolean(),
-})
-
-type FormValues = z.input<typeof formSchema>
-
-const Page = () => {
+const PreferencesCard = () => {
+    const switchId = useId()
+    const settingsQuery = useGetSettings()
     const updateMutation = useUpdateSettings()
 
-    const form = useForm<FormValues>({
-        resolver: zodResolver(formSchema),
-    })
-    const handleSubmit = (values: FormValues) => {
-        updateMutation.mutate(values)
-    }
-
-    const settingsQuery = useGetSettings()
-    const settings = settingsQuery.data
-
-    const isDisabled = settingsQuery.isLoading
-
-    useEffect(() => {
-        if (settingsQuery.isSuccess)
-            form.reset({ dateTimeMode: !!settings?.dateTimeMode })
-    }, [settingsQuery.isSuccess, settings?.dateTimeMode, form.reset])
-
-    if (settingsQuery.isLoading) {
-        return (
-            <div className="max-w-screen-2xl mx-auto w-full pb-10 -mt-6">
-                <Card className="border-none drop-shadow-sm">
-                    <CardHeader>
-                        <Skeleton className="h-8 w-48" />
-                    </CardHeader>
-
-                    <CardContent>
-                        <div className="h-[500px] w-full flex items-center justify-center">
-                            <Loader2 className="size-6 text-slate-300 animate-spin" />
-                        </div>
-                    </CardContent>
-                </Card>
-            </div>
-        )
-    }
-
     return (
-        <div className="max-w-screen-2xl mx-auto w-full pb-10 -mt-6">
-            <Card className="border-none drop-shadow-sm">
-                <CardHeader className="gap-y-2 lg:flex-row lg:items-center lg:justify-between">
-                    <CardTitle className="text-xl line-clamp-1">
-                        Update Your Preferences
-                    </CardTitle>
-                </CardHeader>
-                <CardContent className="">
-                    <Form {...form}>
-                        <form
-                            onSubmit={form.handleSubmit(handleSubmit)}
-                            autoCapitalize="off"
-                            autoComplete="off"
-                            className="pt-4 space-y-4"
-                        >
-                            <div className="grid space-y-4 md:grid-cols-2 grid-cols-1">
-                                <FormField
-                                    disabled={isDisabled}
-                                    name="dateTimeMode"
-                                    control={form.control}
-                                    render={({ field }) => (
-                                        <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
-                                            <div className="space-y-0.5">
-                                                <FormLabel>
-                                                    Allow Select Date Time
-                                                </FormLabel>
-                                                <FormDescription>
-                                                    Allow select date time for
-                                                    transactions
-                                                </FormDescription>
-                                            </div>
-                                            <FormControl>
-                                                <Switch
-                                                    checked={field.value}
-                                                    onCheckedChange={
-                                                        field.onChange
-                                                    }
-                                                />
-                                            </FormControl>
-                                        </FormItem>
-                                    )}
-                                />
-                            </div>
-                            <Button
-                                size="sm"
-                                className="ml-auto"
-                                disabled={isDisabled}
-                            >
-                                <SquarePen className="size-4 mr-2" />
-                                Update Preferences
-                            </Button>
-                        </form>
-                    </Form>
-                </CardContent>
-            </Card>
+        <Card>
+            <CardHeader>
+                <CardTitle>Preferences</CardTitle>
+                <CardDescription>
+                    Changes save as soon as you make them.
+                </CardDescription>
+            </CardHeader>
+            <CardContent>
+                <div className="flex items-start justify-between gap-4 rounded-md border p-4">
+                    <div className="flex gap-3">
+                        <Clock className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
+                        <div className="space-y-1">
+                            <Label htmlFor={switchId}>
+                                Record the time too
+                            </Label>
+                            <p className="text-sm text-muted-foreground">
+                                Show a time picker next to the date when adding
+                                or editing a transaction.
+                            </p>
+                        </div>
+                    </div>
+                    {settingsQuery.isLoading ? (
+                        <Skeleton className="h-6 w-11 rounded-full" />
+                    ) : (
+                        <Switch
+                            id={switchId}
+                            checked={
+                                // Reflect the pending value right away instead of
+                                // snapping back until the refetch lands.
+                                updateMutation.isPending &&
+                                updateMutation.variables?.dateTimeMode !==
+                                    undefined
+                                    ? !!updateMutation.variables.dateTimeMode
+                                    : !!settingsQuery.data?.dateTimeMode
+                            }
+                            disabled={updateMutation.isPending}
+                            onCheckedChange={(checked) =>
+                                updateMutation.mutate({ dateTimeMode: checked })
+                            }
+                        />
+                    )}
+                </div>
+            </CardContent>
+        </Card>
+    )
+}
 
-            <div className="flex flex-row max-sm:flex-col items-start gap-2 justify-center">
+const Page = () => {
+    return (
+        <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-2 lg:gap-6">
+            <div className="space-y-4 lg:space-y-6">
+                <PreferencesCard />
                 <QuickEntryDefaults />
-                <TelegramSettings />
             </div>
+            <TelegramSettings />
         </div>
     )
 }

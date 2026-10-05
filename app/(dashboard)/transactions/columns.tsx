@@ -3,13 +3,11 @@
 import type { ColumnDef } from '@tanstack/react-table'
 import { format } from 'date-fns'
 import type { InferResponseType } from 'hono'
-import { ArrowUpDown } from 'lucide-react'
 
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
+import { SortHeader } from '@/components/sort-header'
 import { Checkbox } from '@/components/ui/checkbox'
 import type { client } from '@/lib/hono'
-import { formatCurrency } from '@/lib/utils'
+import { cn, formatCurrency } from '@/lib/utils'
 import { AccountColumn } from './account-column'
 import { Actions } from './actions'
 import { CategoryColumn } from './category-column'
@@ -46,40 +44,20 @@ export const columns: ColumnDef<ResponseType>[] = [
     },
     {
         accessorKey: 'date',
-        header: ({ column }) => {
-            return (
-                <Button
-                    variant="ghost"
-                    onClick={() =>
-                        column.toggleSorting(column.getIsSorted() === 'asc')
-                    }
-                >
-                    Date
-                    <ArrowUpDown className="ml-2 h-4 w-4" />
-                </Button>
-            )
-        },
+        header: ({ column }) => <SortHeader column={column} label="Date" />,
         cell: ({ row }) => {
             const date = row.getValue('date') as Date
 
-            return <span>{format(date, 'dd MMMM, yyyy')}</span>
+            return (
+                <span className="tabular-nums text-muted-foreground">
+                    {format(date, 'dd MMM yyyy')}
+                </span>
+            )
         },
     },
     {
         accessorKey: 'category',
-        header: ({ column }) => {
-            return (
-                <Button
-                    variant="ghost"
-                    onClick={() =>
-                        column.toggleSorting(column.getIsSorted() === 'asc')
-                    }
-                >
-                    Category
-                    <ArrowUpDown className="ml-2 h-4 w-4" />
-                </Button>
-            )
-        },
+        header: ({ column }) => <SortHeader column={column} label="Category" />,
         cell: ({ row }) => {
             return (
                 <CategoryColumn
@@ -92,63 +70,43 @@ export const columns: ColumnDef<ResponseType>[] = [
     },
     {
         accessorKey: 'payee',
-        header: ({ column }) => {
-            return (
-                <Button
-                    variant="ghost"
-                    onClick={() =>
-                        column.toggleSorting(column.getIsSorted() === 'asc')
-                    }
-                >
-                    Payee
-                    <ArrowUpDown className="ml-2 h-4 w-4" />
-                </Button>
-            )
-        },
+        header: ({ column }) => <SortHeader column={column} label="Payee" />,
+        cell: ({ row }) => (
+            <span className="font-medium">
+                {row.original.payee || (
+                    <span className="text-muted-foreground font-normal">
+                        No payee
+                    </span>
+                )}
+            </span>
+        ),
     },
     {
         accessorKey: 'amount',
-        header: ({ column }) => {
-            return (
-                <Button
-                    variant="ghost"
-                    onClick={() =>
-                        column.toggleSorting(column.getIsSorted() === 'asc')
-                    }
-                >
-                    Amount
-                    <ArrowUpDown className="ml-2 h-4 w-4" />
-                </Button>
-            )
-        },
+        header: ({ column }) => (
+            <div className="flex justify-end">
+                <SortHeader column={column} label="Amount" align="right" />
+            </div>
+        ),
         cell: ({ row }) => {
             const amount = parseFloat(row.getValue('amount'))
 
             return (
-                <Badge
-                    variant={amount < 0 ? 'destructive' : 'primary'}
-                    className="text-xs font-medium px-2.5 py-2.5"
+                <div
+                    className={cn(
+                        'text-right font-mono text-[13px] font-medium tabular-nums',
+                        amount < 0 ? 'text-foreground' : 'text-income'
+                    )}
                 >
+                    {amount > 0 && '+'}
                     {formatCurrency(amount)}
-                </Badge>
+                </div>
             )
         },
     },
     {
         accessorKey: 'account',
-        header: ({ column }) => {
-            return (
-                <Button
-                    variant="ghost"
-                    onClick={() =>
-                        column.toggleSorting(column.getIsSorted() === 'asc')
-                    }
-                >
-                    Account
-                    <ArrowUpDown className="ml-2 h-4 w-4" />
-                </Button>
-            )
-        },
+        header: ({ column }) => <SortHeader column={column} label="Account" />,
         cell: ({ row }) => {
             return (
                 <AccountColumn

@@ -34,7 +34,7 @@ export const NewAccountSheet = () => {
         <Sheet open={isOpen || mutation.isPending} onOpenChange={onClose}>
             <SheetContent className="space-y-4">
                 <SheetHeader>
-                    <SheetTitle>New Account</SheetTitle>
+                    <SheetTitle>New account</SheetTitle>
 
                     <SheetDescription>
                         Create a new account to track your transactions.

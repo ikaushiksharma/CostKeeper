@@ -29,8 +29,9 @@ export const EditTransactionSheet = () => {
     const { isOpen, onClose, id } = useOpenTransaction()
 
     const [ConfirmDialog, confirm] = useConfirm(
-        'Are you sure?',
-        'You are about to delete this transaction.'
+        'Delete this transaction?',
+        "This can't be undone.",
+        { confirmLabel: 'Delete', destructive: true }
     )
 
     const transactionQuery = useGetTransaction(id)
@@ -112,7 +113,7 @@ export const EditTransactionSheet = () => {
             <Sheet open={isOpen || isPending} onOpenChange={onClose}>
                 <SheetContent className="space-y-4">
                     <SheetHeader>
-                        <SheetTitle>Edit Transaction</SheetTitle>
+                        <SheetTitle>Edit transaction</SheetTitle>
 
                         <SheetDescription>
                             Edit an existing transaction.

@@ -1,24 +1,15 @@
-import {
-    AreaChart,
-    BarChart3,
-    FileSearch,
-    LineChart,
-    Loader2,
-} from 'lucide-react'
+import { AreaChart, BarChart3, LineChart, Plus, TrendingUp } from 'lucide-react'
 import { useState } from 'react'
 
+import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
+import { useNewTransaction } from '@/features/transactions/hooks/use-new-transaction'
 import { AreaVariant } from './area-variant'
 import { BarVariant } from './bar-variant'
+import { EmptyState } from './empty-state'
 import { LineVariant } from './line-variant'
+import { Segmented } from './segmented'
 
 type ChartProps = {
     data?: {
@@ -28,60 +19,64 @@ type ChartProps = {
     }[]
 }
 
+type ChartType = 'area' | 'bar' | 'line'
+
+const chartOptions = [
+    { value: 'area' as const, label: 'Area chart', icon: AreaChart },
+    { value: 'line' as const, label: 'Line chart', icon: LineChart },
+    { value: 'bar' as const, label: 'Bar chart', icon: BarChart3 },
+]
+
+export const ChartLegend = () => (
+    <div className="flex items-center gap-4 text-xs text-muted-foreground">
+        <span className="inline-flex items-center gap-1.5">
+            <span className="size-2 rounded-full bg-income" aria-hidden />
+            Income
+        </span>
+        <span className="inline-flex items-center gap-1.5">
+            <span className="size-2 rounded-full bg-expense" aria-hidden />
+            Expenses
+        </span>
+    </div>
+)
+
 export const Chart = ({ data = [] }: ChartProps) => {
-    type ChartType = 'area' | 'bar' | 'line'
     const [chartType, setChartType] = useState<ChartType>('area')
+    const newTransaction = useNewTransaction()
 
-    const onTypeChange = (type: ChartType) => {
-        setChartType(type)
-    }
     return (
-        <Card className="border-none drop-shadow-sm">
-            <CardHeader className="flex space-y-2 lg:space-y-0 lg:flex-row lg:items-center justify-between">
-                <CardTitle className="text-xl line-clamp-1">
-                    Transactions
-                </CardTitle>
-                <Select defaultValue={chartType} onValueChange={onTypeChange}>
-                    <SelectTrigger className="lg:w-auto h-9 rounded-md px-3">
-                        <SelectValue placeholder="Chart type" />
-                    </SelectTrigger>
-
-                    <SelectContent>
-                        <SelectItem value="area">
-                            <div className="flex items-center">
-                                <AreaChart className="size-4 mr-2 shrink-0" />
-
-                                <p className="line-clamp-1">Area chart</p>
-                            </div>
-                        </SelectItem>
-
-                        <SelectItem value="line">
-                            <div className="flex items-center">
-                                <LineChart className="size-4 mr-2 shrink-0" />
-
-                                <p className="line-clamp-1">Line chart</p>
-                            </div>
-                        </SelectItem>
-
-                        <SelectItem value="bar">
-                            <div className="flex items-center">
-                                <BarChart3 className="size-4 mr-2 shrink-0" />
-
-                                <p className="line-clamp-1">Bar chart</p>
-                            </div>
-                        </SelectItem>
-                    </SelectContent>
-                </Select>
+        <Card>
+            <CardHeader className="flex-row flex-wrap items-center justify-between gap-3 space-y-0">
+                <div className="space-y-2">
+                    <CardTitle>Cash flow</CardTitle>
+                    <ChartLegend />
+                </div>
+                <Segmented
+                    label="Chart type"
+                    value={chartType}
+                    onChange={setChartType}
+                    options={chartOptions}
+                    iconOnly
+                />
             </CardHeader>
 
             <CardContent>
                 {data.length === 0 ? (
-                    <div className="flex flex-col gap-y-4 items-center justify-center h-[350px] w-full">
-                        <FileSearch className="size-6 text-muted-foreground" />
-                        <p className="text-muted-foreground text-sm">
-                            No data for this period.
-                        </p>
-                    </div>
+                    <EmptyState
+                        icon={TrendingUp}
+                        title="No activity in this period"
+                        description="Add a transaction or pick a wider date range to see your cash flow."
+                        className="h-[320px]"
+                        action={
+                            <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={newTransaction.onOpen}
+                            >
+                                <Plus className="size-4" /> Add transaction
+                            </Button>
+                        }
+                    />
                 ) : (
                     <>
                         {chartType === 'area' && <AreaVariant data={data} />}
@@ -96,16 +91,16 @@ export const Chart = ({ data = [] }: ChartProps) => {
 
 export const ChartLoading = () => {
     return (
-        <Card className="border-none drop-shadow-sm">
-            <CardHeader className="flex space-y-2 lg:space-y-0 lg:flex-row lg:items-center justify-between">
-                <Skeleton className="h-8 w-48" />
-                <Skeleton className="h-8 lg:w-[120px] w-full" />
-            </CardHeader>
-
-            <CardContent>
-                <div className="h-[350px] w-full flex items-center justify-center">
-                    <Loader2 className="size-6 text-slate-300 animate-spin" />
+        <Card>
+            <CardHeader className="flex-row items-center justify-between space-y-0">
+                <div className="space-y-2">
+                    <Skeleton className="h-5 w-28" />
+                    <Skeleton className="h-3 w-36" />
                 </div>
+                <Skeleton className="h-9 w-28" />
+            </CardHeader>
+            <CardContent>
+                <Skeleton className="h-[320px] w-full" />
             </CardContent>
         </Card>
     )

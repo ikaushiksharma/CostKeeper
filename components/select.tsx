@@ -29,51 +29,80 @@ export const Select = ({
         onChange(option?.value)
     }
 
+    const isPortaledToBody =
+        typeof document !== 'undefined' && menuPortalTarget === document.body
+
     const formattedValue = useMemo(() => {
         return options.find((option) => option.value === value)
     }, [options, value])
     return (
         <CreatableSelect
             placeholder={placeholder}
-            className="text-sm h-10 bg-background"
+            className="text-sm"
             menuPortalTarget={menuPortalTarget}
             styles={{
                 menuPortal: (base) => ({
                     ...base,
-                    ...(menuPortalTarget === document.body && { zIndex: 9999 }),
+                    ...(isPortaledToBody && { zIndex: 9999 }),
                 }),
                 menu: (base) => ({
                     ...base,
-                    ...(menuPortalTarget === document.body && { zIndex: 9999 }),
+                    ...(isPortaledToBody && { zIndex: 9999 }),
+                    backgroundColor: 'hsl(var(--popover))',
+                    border: '1px solid hsl(var(--border))',
+                    borderRadius: 10,
+                    boxShadow: '0 12px 32px -12px hsl(240 10% 10% / 0.25)',
+                    overflow: 'hidden',
                 }),
                 menuList: (base) => ({
                     ...base,
-                    backgroundColor: 'hsl(var(--background))',
+                    padding: 4,
                 }),
                 input: (base) => ({
                     ...base,
                     color: 'hsl(var(--foreground))',
                 }),
-                singleValue(base) {
-                    return {
-                        ...base,
-                        color: 'hsl(var(--foreground))',
-                    }
-                },
-                option: (base, { isFocused }) => ({
+                placeholder: (base) => ({
                     ...base,
-                    backgroundColor: isFocused
-                        ? 'hsl(var(--input))'
-                        : 'hsl(var(--background))',
+                    color: 'hsl(var(--muted-foreground))',
                 }),
-                control: (base) => ({
+                singleValue: (base) => ({
                     ...base,
-                    backgroundColor: 'hsl(var(--background))',
-                    borderColor: 'hsl(var(--input))',
+                    color: 'hsl(var(--foreground))',
+                }),
+                option: (base, { isFocused, isSelected }) => ({
+                    ...base,
+                    borderRadius: 6,
+                    cursor: 'pointer',
+                    color: isSelected
+                        ? 'hsl(var(--brand))'
+                        : 'hsl(var(--popover-foreground))',
+                    fontWeight: isSelected ? 500 : 400,
+                    backgroundColor: isSelected
+                        ? 'hsl(var(--brand-soft))'
+                        : isFocused
+                          ? 'hsl(var(--accent))'
+                          : 'transparent',
+                    ':active': { backgroundColor: 'hsl(var(--accent))' },
+                }),
+                control: (base, { isFocused }) => ({
+                    ...base,
+                    minHeight: 40,
+                    borderRadius: 10,
+                    backgroundColor: 'hsl(var(--card))',
+                    borderColor: isFocused
+                        ? 'hsl(var(--ring))'
+                        : 'hsl(var(--input))',
+                    boxShadow: isFocused
+                        ? '0 0 0 1px hsl(var(--ring))'
+                        : 'none',
                     ':hover': {
-                        borderColor: 'hsl(var(--input))',
+                        borderColor: isFocused
+                            ? 'hsl(var(--ring))'
+                            : 'hsl(var(--input))',
                     },
                 }),
+                indicatorSeparator: () => ({ display: 'none' }),
             }}
             value={formattedValue}
             onChange={onSelect}

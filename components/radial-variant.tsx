@@ -8,16 +8,11 @@ import {
 import { formatCurrency } from '@/lib/utils'
 
 const COLORS = [
-    // blue
-    '#0062FF',
-    // light blue
-    '#12C6FF',
-    // red
-    '#FF647F',
-    // orange
-    '#FF9354',
-    // purple
-    '#FF00FF',
+    'hsl(var(--chart-1))',
+    'hsl(var(--chart-2))',
+    'hsl(var(--chart-3))',
+    'hsl(var(--chart-4))',
+    'hsl(var(--chart-5))',
 ]
 
 type RadialVariantProps = {
@@ -29,7 +24,7 @@ type RadialVariantProps = {
 
 export const RadialVariant = ({ data }: RadialVariantProps) => {
     return (
-        <ResponsiveContainer width="100%" height={350}>
+        <ResponsiveContainer width="100%" height={320}>
             <RadialBarChart
                 cx="50%"
                 cy="30%"
@@ -44,7 +39,7 @@ export const RadialVariant = ({ data }: RadialVariantProps) => {
                 <RadialBar
                     label={{
                         position: 'insideStart',
-                        fill: '#fff',
+                        fill: 'hsl(var(--primary-foreground))',
                         fontSize: '12px',
                     }}
                     background
@@ -77,7 +72,7 @@ export const RadialVariant = ({ data }: RadialVariantProps) => {
                                                 {entry.value}
                                             </span>
 
-                                            <span className="text-sm">
+                                            <span className="text-sm font-medium tabular-nums">
                                                 {formatCurrency(
                                                     entry.payload?.value
                                                 )}

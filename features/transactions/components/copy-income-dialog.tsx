@@ -14,7 +14,7 @@ import {
     CopyCheck,
     Loader2,
     Square,
-    TrendingUp,
+    Repeat,
 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
@@ -115,10 +115,10 @@ export const CopyIncomeDialog = ({ open, onOpenChange }: Props) => {
             <DialogContent className="sm:max-w-lg">
                 <DialogHeader>
                     <div className="flex items-center gap-2">
-                        <div className="flex size-9 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/30">
-                            <TrendingUp className="size-4 text-emerald-600 dark:text-emerald-400" />
+                        <div className="flex size-9 items-center justify-center rounded-full bg-income/10">
+                            <Repeat className="size-4 text-income" />
                         </div>
-                        <DialogTitle>Copy Last Month&apos;s Income</DialogTitle>
+                        <DialogTitle>Copy last month&apos;s income</DialogTitle>
                     </div>
                     <DialogDescription className="pt-1">
                         Re-create your income entries from{' '}
@@ -167,7 +167,7 @@ export const CopyIncomeDialog = ({ open, onOpenChange }: Props) => {
                                 className="mb-2 flex w-full items-center gap-2 rounded-md px-1 py-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
                             >
                                 {allSelected ? (
-                                    <CheckSquare className="size-4 text-emerald-600" />
+                                    <CheckSquare className="size-4 text-income" />
                                 ) : (
                                     <Square className="size-4" />
                                 )}
@@ -192,7 +192,7 @@ export const CopyIncomeDialog = ({ open, onOpenChange }: Props) => {
                                                 onClick={() => toggleItem(t.id)}
                                                 className={`flex w-full items-center gap-3 rounded-lg border px-3 py-2.5 text-left transition-colors ${
                                                     isSelected
-                                                        ? 'border-emerald-200 bg-emerald-50/50 dark:border-emerald-800 dark:bg-emerald-900/10'
+                                                        ? 'border-income/30 bg-income/5'
                                                         : 'border-border hover:bg-muted/40'
                                                 }`}
                                             >
@@ -204,7 +204,7 @@ export const CopyIncomeDialog = ({ open, onOpenChange }: Props) => {
                                                     onClick={(e) =>
                                                         e.stopPropagation()
                                                     }
-                                                    className="pointer-events-none data-[state=checked]:border-emerald-600 data-[state=checked]:bg-emerald-600"
+                                                    className="pointer-events-none data-[state=checked]:border-income data-[state=checked]:bg-income data-[state=checked]:text-brand-foreground"
                                                 />
                                                 <div className="min-w-0 flex-1">
                                                     <p className="truncate text-sm font-medium leading-none">
@@ -242,7 +242,7 @@ export const CopyIncomeDialog = ({ open, onOpenChange }: Props) => {
                                                 </div>
                                                 <Badge
                                                     variant="outline"
-                                                    className="shrink-0 border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-900/20 dark:text-emerald-400"
+                                                    className="shrink-0 border-transparent bg-income/10 font-mono tabular-nums text-income"
                                                 >
                                                     +{formatCurrency(t.amount)}
                                                 </Badge>
@@ -270,12 +270,12 @@ export const CopyIncomeDialog = ({ open, onOpenChange }: Props) => {
                             bulkCreate.isPending ||
                             isEmpty
                         }
-                        className="bg-emerald-600 hover:bg-emerald-700 text-white"
+                        variant="brand"
                     >
                         {bulkCreate.isPending ? (
                             <>
                                 <Loader2 className="mr-2 size-4 animate-spin" />
-                                Copying…
+                                Copying
                             </>
                         ) : (
                             <>

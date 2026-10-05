@@ -1,6 +1,7 @@
 'use client'
 
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
+import { WalletCards } from 'lucide-react'
 import qs from 'query-string'
 
 import {
@@ -51,7 +52,11 @@ export const AccountFilter = () => {
             onValueChange={onChange}
             disabled={isLoadingAccounts || isLoadingSummary}
         >
-            <SelectTrigger className="lg:w-auto w-full h-9 rounded-md px-3 font-normal bg-white/10 hover:bg-white/30 hover:text-white border-none focus:ring-offset-0 focus:ring-transparent outline-none text-white focus:bg-white/30 transition">
+            <SelectTrigger
+                aria-label="Filter by account"
+                className="sm:w-auto sm:min-w-40 w-full gap-2 bg-card hover:bg-accent transition-colors"
+            >
+                <WalletCards className="size-4 text-muted-foreground shrink-0" />
                 <SelectValue placeholder="Select account" />
             </SelectTrigger>
 

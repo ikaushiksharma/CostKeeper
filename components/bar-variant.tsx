@@ -9,7 +9,6 @@ import {
 
 import { CustomTooltip } from '@/components/custom-tooltip'
 import { format } from 'date-fns'
-import { useTheme } from 'next-themes'
 
 type BarVariantProps = {
     data: {
@@ -20,13 +19,13 @@ type BarVariantProps = {
 }
 
 export const BarVariant = ({ data }: BarVariantProps) => {
-    const { theme } = useTheme()
     return (
-        <ResponsiveContainer width="100%" height={350}>
+        <ResponsiveContainer width="100%" height={320}>
             <BarChart data={data}>
                 <CartesianGrid
-                    stroke={theme === 'dark' ? '#1E293B' : '#e2e8f0'}
+                    stroke="hsl(var(--border))"
                     strokeDasharray="3 3"
+                    vertical={false}
                 />
 
                 <XAxis
@@ -34,13 +33,19 @@ export const BarVariant = ({ data }: BarVariantProps) => {
                     tickLine={false}
                     dataKey="date"
                     tickFormatter={(value) => format(value, 'dd MMM')}
-                    style={{
-                        fontSize: '12px',
+                    tick={{
+                        fill: 'hsl(var(--muted-foreground))',
+                        fontSize: 12,
                     }}
-                    tickMargin={16}
+                    tickMargin={12}
+                    minTickGap={24}
                 />
 
                 <Tooltip
+                    cursor={{
+                        stroke: 'hsl(var(--border))',
+                        fill: 'hsl(var(--muted))',
+                    }}
                     content={({ active, payload }) => (
                         <CustomTooltip active={active} payload={payload} />
                     )}
@@ -48,13 +53,13 @@ export const BarVariant = ({ data }: BarVariantProps) => {
 
                 <Bar
                     dataKey="income"
-                    fill="#3d82f6"
-                    className="drop-shadow-sm"
+                    radius={[3, 3, 0, 0]}
+                    fill="hsl(var(--income))"
                 />
                 <Bar
                     dataKey="expenses"
-                    fill="#f43f5e"
-                    className="drop-shadow-sm"
+                    radius={[3, 3, 0, 0]}
+                    fill="hsl(var(--expense))"
                 />
             </BarChart>
         </ResponsiveContainer>

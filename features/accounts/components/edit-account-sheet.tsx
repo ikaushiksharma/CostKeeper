@@ -25,8 +25,9 @@ type FormValues = z.infer<typeof formSchema>
 export const EditAccountSheet = () => {
     const { isOpen, onClose, id } = useOpenAccount()
     const [ConfirmDialog, confirm] = useConfirm(
-        'Are you sure?',
-        'You are about to delete this account.'
+        'Delete this account?',
+        "All transactions in this account will be deleted too. This can't be undone.",
+        { confirmLabel: 'Delete', destructive: true }
     )
     const accountQuery = useGetAccount(id)
     const editMutation = useEditAccount(id)
@@ -68,7 +69,7 @@ export const EditAccountSheet = () => {
             <Sheet open={isOpen || isPending} onOpenChange={onClose}>
                 <SheetContent className="space-y-4">
                     <SheetHeader>
-                        <SheetTitle>Edit Account</SheetTitle>
+                        <SheetTitle>Edit account</SheetTitle>
 
                         <SheetDescription>
                             Edit an existing account.

@@ -1,27 +1,59 @@
 {
-    "name": "Cost Keeper",
+    "id": "/",
+    "name": "CostKeeper",
     "short_name": "CostKeeper",
-    "theme_color": "#00ff00",
-    "background_color": "#ffffff",
-    "display": "browser",
-    "orientation": "any",
-    "scope": "/",
+    "description": "Track your income and expenses with CostKeeper.",
+    "lang": "en-IN",
+    "dir": "ltr",
     "start_url": "/",
+    "scope": "/",
+    "display": "standalone",
+    "orientation": "any",
+    "theme_color": "#f7f7f8",
+    "background_color": "#f7f7f8",
+    "categories": ["finance", "productivity"],
     "icons": [
         {
             "src": "/icon-192.png",
             "type": "image/png",
-            "sizes": "192x192"
+            "sizes": "192x192",
+            "purpose": "any"
         },
         {
             "src": "/icon-256.png",
             "type": "image/png",
-            "sizes": "256x256"
+            "sizes": "256x256",
+            "purpose": "any"
         },
         {
             "src": "/icon-512.png",
             "type": "image/png",
-            "sizes": "512x512"
+            "sizes": "512x512",
+            "purpose": "any"
+        },
+        {
+            "src": "/icon-maskable-192.png",
+            "type": "image/png",
+            "sizes": "192x192",
+            "purpose": "maskable"
+        },
+        {
+            "src": "/icon-maskable-512.png",
+            "type": "image/png",
+            "sizes": "512x512",
+            "purpose": "maskable"
+        }
+    ],
+    "shortcuts": [
+        {
+            "name": "Transactions",
+            "url": "/transactions",
+            "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+        },
+        {
+            "name": "Accounts",
+            "url": "/accounts",
+            "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
         }
     ]
 }

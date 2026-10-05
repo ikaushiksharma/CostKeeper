@@ -1,18 +1,13 @@
-import { FileSearch, Loader2, PieChart, Radar, Target } from 'lucide-react'
+import { PieChart, Radar, Shapes, Target } from 'lucide-react'
 import { useState } from 'react'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
+import { EmptyState } from './empty-state'
 import { PieVariant } from './pie-variant'
 import { RadarVariant } from './radar-variant'
 import { RadialVariant } from './radial-variant'
+import { Segmented } from './segmented'
 
 type SpendingPieProps = {
     data?: {
@@ -21,62 +16,43 @@ type SpendingPieProps = {
     }[]
 }
 
+type ChartType = 'pie' | 'radar' | 'radial'
+
+const chartOptions = [
+    { value: 'pie' as const, label: 'Donut chart', icon: PieChart },
+    { value: 'radar' as const, label: 'Radar chart', icon: Radar },
+    { value: 'radial' as const, label: 'Radial chart', icon: Target },
+]
+
 export const SpendingPie = ({ data = [] }: SpendingPieProps) => {
-    type ChartType = 'pie' | 'radar' | 'radial'
     const [chartType, setChartType] = useState<ChartType>('pie')
 
-    const onTypeChange = (type: ChartType) => {
-        setChartType(type)
-    }
     return (
-        <Card className="border-none drop-shadow-sm">
-            <CardHeader className="flex space-y-2 lg:space-y-0 lg:flex-row lg:items-center justify-between">
-                <CardTitle className="text-xl line-clamp-1">
-                    Categories
-                </CardTitle>
-
-                <Select defaultValue={chartType} onValueChange={onTypeChange}>
-                    <SelectTrigger className="lg:w-auto h-9 rounded-md px-3">
-                        <SelectValue placeholder="Chart type" />
-                    </SelectTrigger>
-
-                    <SelectContent>
-                        <SelectItem value="pie">
-                            <div className="flex items-center">
-                                <PieChart className="size-4 mr-2 shrink-0" />
-
-                                <p className="line-clamp-1">Pie chart</p>
-                            </div>
-                        </SelectItem>
-
-                        <SelectItem value="radar">
-                            <div className="flex items-center">
-                                <Radar className="size-4 mr-2 shrink-0" />
-
-                                <p className="line-clamp-1">Radar chart</p>
-                            </div>
-                        </SelectItem>
-
-                        <SelectItem value="radial">
-                            <div className="flex items-center">
-                                <Target className="size-4 mr-2 shrink-0" />
-
-                                <p className="line-clamp-1">Radial chart</p>
-                            </div>
-                        </SelectItem>
-                    </SelectContent>
-                </Select>
+        <Card className="h-full">
+            <CardHeader className="flex-row flex-wrap items-center justify-between gap-3 space-y-0">
+                <div className="space-y-2">
+                    <CardTitle>Spending by category</CardTitle>
+                    <p className="text-xs text-muted-foreground">
+                        Top four, the rest grouped as Other
+                    </p>
+                </div>
+                <Segmented
+                    label="Chart type"
+                    value={chartType}
+                    onChange={setChartType}
+                    options={chartOptions}
+                    iconOnly
+                />
             </CardHeader>
 
             <CardContent>
                 {data.length === 0 ? (
-                    <div className="flex flex-col gap-y-4 items-center justify-center h-[350px] w-full">
-                        <FileSearch className="size-6 text-muted-foreground" />
-
-                        <p className="text-muted-foreground text-sm">
-                            No data for this period.
-                        </p>
-                    </div>
+                    <EmptyState
+                        icon={Shapes}
+                        title="No spending yet"
+                        description="Categorised expenses in this period will show up here."
+                        className="h-[320px]"
+                    />
                 ) : (
                     <>
                         {chartType === 'pie' && <PieVariant data={data} />}
@@ -93,16 +69,16 @@ export const SpendingPie = ({ data = [] }: SpendingPieProps) => {
 
 export const SpendingPieLoading = () => {
     return (
-        <Card className="border-none drop-shadow-sm">
-            <CardHeader className="flex space-y-2 lg:space-y-0 lg:flex-row lg:items-center justify-between">
-                <Skeleton className="h-8 w-48" />
-                <Skeleton className="h-8 lg:w-[120px] w-full" />
-            </CardHeader>
-
-            <CardContent>
-                <div className="h-[350px] w-full flex items-center justify-center">
-                    <Loader2 className="size-6 text-slate-300 animate-spin" />
+        <Card className="h-full">
+            <CardHeader className="flex-row items-center justify-between space-y-0">
+                <div className="space-y-2">
+                    <Skeleton className="h-5 w-40" />
+                    <Skeleton className="h-3 w-32" />
                 </div>
+                <Skeleton className="h-9 w-28" />
+            </CardHeader>
+            <CardContent className="flex h-[352px] items-center justify-center">
+                <Skeleton className="size-48 rounded-full" />
             </CardContent>
         </Card>
     )

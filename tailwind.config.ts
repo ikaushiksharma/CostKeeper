@@ -18,7 +18,25 @@ const config = {
             },
         },
         extend: {
+            fontFamily: {
+                sans: ['var(--font-geist-sans)', 'system-ui', 'sans-serif'],
+                mono: ['var(--font-geist-mono)', 'ui-monospace', 'monospace'],
+            },
             colors: {
+                brand: {
+                    DEFAULT: 'hsl(var(--brand))',
+                    foreground: 'hsl(var(--brand-foreground))',
+                    soft: 'hsl(var(--brand-soft))',
+                },
+                income: 'hsl(var(--income))',
+                expense: 'hsl(var(--expense))',
+                chart: {
+                    1: 'hsl(var(--chart-1))',
+                    2: 'hsl(var(--chart-2))',
+                    3: 'hsl(var(--chart-3))',
+                    4: 'hsl(var(--chart-4))',
+                    5: 'hsl(var(--chart-5))',
+                },
                 border: 'hsl(var(--border))',
                 input: 'hsl(var(--input))',
                 ring: 'hsl(var(--ring))',

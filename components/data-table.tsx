@@ -12,7 +12,7 @@ import {
     useReactTable,
 } from '@tanstack/react-table'
 import { useVirtualizer } from '@tanstack/react-virtual'
-import { Loader2, Trash } from 'lucide-react'
+import { Loader2, Search, Trash2 } from 'lucide-react'
 import * as React from 'react'
 
 import { Button } from '@/components/ui/button'
@@ -32,6 +32,8 @@ interface DataTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[]
     data: TData[]
     filterKey: string
+    filterPlaceholder?: string
+    emptyState?: React.ReactNode
     onDelete: (rows: Row<TData>[]) => void
     disabled?: boolean
     amountKey?: keyof TData
@@ -44,6 +46,8 @@ export function DataTable<TData, TValue>({
     columns,
     data,
     filterKey,
+    filterPlaceholder,
+    emptyState,
     onDelete,
     disabled,
     amountKey,
@@ -52,8 +56,9 @@ export function DataTable<TData, TValue>({
     isFetchingNextPage,
 }: DataTableProps<TData, TValue>) {
     const [ConfirmDialog, confirm] = useConfirm(
-        'Are you sure?',
-        'You are about to perform a bulk delete.'
+        'Delete selected rows?',
+        "This can't be undone.",
+        { confirmLabel: 'Delete', destructive: true }
     )
     const [sorting, setSorting] = React.useState<SortingState>([])
     const [columnFilters, setColumnFilters] =
@@ -119,6 +124,8 @@ export function DataTable<TData, TValue>({
     ])
 
     const selectedRows = table.getFilteredSelectedRowModel().rows
+    const filterValue =
+        (table.getColumn(filterKey)?.getFilterValue() as string) ?? ''
     const total = React.useMemo(() => {
         if (!amountKey) return null
         return selectedRows.reduce((sum, row) => {
@@ -130,58 +137,56 @@ export function DataTable<TData, TValue>({
     return (
         <div>
             <ConfirmDialog />
-            <div className="flex items-center py-4">
-                <Input
-                    placeholder={`Filter ${filterKey}...`}
-                    value={
-                        (table
-                            .getColumn(filterKey)
-                            ?.getFilterValue() as string) ?? ''
-                    }
-                    onChange={(event) =>
-                        table
-                            .getColumn(filterKey)
-                            ?.setFilterValue(event.target.value)
-                    }
-                    className="max-w-sm"
-                />
+            <div className="flex flex-col-reverse gap-2 pb-4 sm:flex-row sm:items-center sm:justify-between">
+                <div className="relative w-full sm:max-w-xs">
+                    <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                    <Input
+                        type="search"
+                        aria-label={filterPlaceholder ?? `Search ${filterKey}`}
+                        placeholder={filterPlaceholder ?? `Search ${filterKey}`}
+                        value={filterValue}
+                        onChange={(event) =>
+                            table
+                                .getColumn(filterKey)
+                                ?.setFilterValue(event.target.value)
+                        }
+                        className="pl-9"
+                    />
+                </div>
 
-                {table.getFilteredSelectedRowModel().rows.length > 0 && (
+                {selectedRows.length > 0 && (
                     <Button
                         disabled={disabled}
                         size="sm"
-                        variant="outline"
-                        className="ml-auto font-normal text-xs"
+                        variant="destructive-ghost"
+                        className="self-end sm:self-auto"
                         onClick={async () => {
                             const ok = await confirm()
 
                             if (ok) {
-                                onDelete(
-                                    table.getFilteredSelectedRowModel().rows
-                                )
+                                onDelete(selectedRows)
                                 table.resetRowSelection()
                             }
                         }}
                     >
-                        <Trash className="size-4 mr-2" />
-                        Delete (
-                        {table.getFilteredSelectedRowModel().rows.length})
+                        <Trash2 className="size-4" />
+                        Delete {selectedRows.length} selected
                     </Button>
                 )}
             </div>
             <div
                 ref={tableContainerRef}
-                className="rounded-md border h-[50vh] overflow-auto relative"
+                className="relative h-[calc(100dvh-22rem)] min-h-[320px] overflow-auto rounded-md border"
             >
                 <Table className="min-w-full">
-                    <TableHeader className="sticky top-0 z-10 bg-background">
+                    <TableHeader className="sticky top-0 z-10 bg-muted/80 backdrop-blur">
                         {table.getHeaderGroups().map((headerGroup) => (
                             <TableRow key={headerGroup.id}>
                                 {headerGroup.headers.map((header) => {
                                     return (
                                         <TableHead
                                             key={header.id}
-                                            className="whitespace-nowrap px-4 py-2"
+                                            className="h-10 whitespace-nowrap px-4 py-1"
                                         >
                                             {header.isPlaceholder
                                                 ? null
@@ -227,7 +232,7 @@ export function DataTable<TData, TValue>({
                                             >
                                                 <TableCell
                                                     colSpan={columns.length}
-                                                    className="h-12 text-center whitespace-nowrap px-4 py-2"
+                                                    className="h-12 text-center whitespace-nowrap px-4 py-2 text-sm text-muted-foreground"
                                                 >
                                                     {hasNextPage ? (
                                                         <div className="flex items-center justify-center gap-2">
@@ -235,7 +240,7 @@ export function DataTable<TData, TValue>({
                                                             Loading more...
                                                         </div>
                                                     ) : (
-                                                        'No more data'
+                                                        "That's everything"
                                                     )}
                                                 </TableCell>
                                             </TableRow>
@@ -257,7 +262,7 @@ export function DataTable<TData, TValue>({
                                                 .map((cell) => (
                                                     <TableCell
                                                         key={cell.id}
-                                                        className="whitespace-nowrap px-4 py-2"
+                                                        className="whitespace-nowrap px-4 py-2.5"
                                                     >
                                                         {flexRender(
                                                             cell.column
@@ -291,29 +296,43 @@ export function DataTable<TData, TValue>({
                             <TableRow>
                                 <TableCell
                                     colSpan={columns.length}
-                                    className="h-24 text-center"
+                                    className="h-64 text-center hover:bg-transparent"
                                 >
-                                    No results.
+                                    {filterValue || !emptyState ? (
+                                        <div className="space-y-1">
+                                            <p className="text-sm font-medium">
+                                                No matches
+                                            </p>
+                                            <p className="text-sm text-muted-foreground">
+                                                {filterValue
+                                                    ? `Nothing matches "${filterValue}". Try a different search.`
+                                                    : 'Nothing to show yet.'}
+                                            </p>
+                                        </div>
+                                    ) : (
+                                        emptyState
+                                    )}
                                 </TableCell>
                             </TableRow>
                         )}
                     </TableBody>
                 </Table>
             </div>
-            <div className="flex items-center justify-between py-4">
-                <div className="flex-1 text-sm text-muted-foreground">
-                    {table.getFilteredSelectedRowModel().rows.length} of{' '}
-                    {table.getFilteredRowModel().rows.length} row(s) selected.
-                    {!!total && (
-                        <span className="ml-2">
-                            Total: {formatCurrency(total)}
+            <div className="flex items-center justify-between pt-3 text-sm text-muted-foreground">
+                <p className="tabular-nums">
+                    {selectedRows.length > 0
+                        ? `${selectedRows.length} of ${rows.length} selected`
+                        : `${rows.length} ${rows.length === 1 ? 'row' : 'rows'}`}
+                    {selectedRows.length > 0 && total !== null && (
+                        <span className="ml-3 font-medium text-foreground">
+                            Total {formatCurrency(total)}
                         </span>
                     )}
-                </div>
+                </p>
                 {isFetchingNextPage && (
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <div className="flex items-center gap-2">
                         <Loader2 className="size-4 animate-spin" />
-                        Loading more...
+                        Loading more
                     </div>
                 )}
             </div>

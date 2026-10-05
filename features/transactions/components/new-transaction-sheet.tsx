@@ -13,6 +13,7 @@ import { useCreateAccount } from '@/features/accounts/api/use-create-account'
 import { useGetAccounts } from '@/features/accounts/api/use-get-accounts'
 import { useCreateCategory } from '@/features/categories/api/use-create-category'
 import { useGetCategories } from '@/features/categories/api/use-get-categories'
+import { useGetSettings } from '@/features/settings/api/use-get-settings'
 import { useCreateTransaction } from '@/features/transactions/api/use-create-transaction'
 import { useNewTransaction } from '@/features/transactions/hooks/use-new-transaction'
 
@@ -47,7 +48,11 @@ export const NewTransactionSheet = () => {
         createMutation.isPending ||
         categoryMutation.isPending ||
         accountMutation.isPending
-    const isLoading = categoryQuery.isLoading || accountQuery.isLoading
+    const settingsQuery = useGetSettings()
+    const isLoading =
+        categoryQuery.isLoading ||
+        accountQuery.isLoading ||
+        settingsQuery.isLoading
 
     const onSubmit = (values: FormValues) => {
         createMutation.mutate(values, {
@@ -61,9 +66,11 @@ export const NewTransactionSheet = () => {
         <Sheet open={isOpen || isPending} onOpenChange={onClose}>
             <SheetContent className="space-y-4">
                 <SheetHeader>
-                    <SheetTitle>New Transaction</SheetTitle>
+                    <SheetTitle>New transaction</SheetTitle>
 
-                    <SheetDescription>Add a new transaction.</SheetDescription>
+                    <SheetDescription>
+                        Record money going out or coming in.
+                    </SheetDescription>
                 </SheetHeader>
 
                 {isLoading ? (
@@ -72,6 +79,18 @@ export const NewTransactionSheet = () => {
                     </div>
                 ) : (
                     <TransactionForm
+                        defaultValues={{
+                            date: new Date(),
+                            amount: '',
+                            payee: '',
+                            notes: '',
+                            accountId:
+                                settingsQuery.data?.defaultAccountId ??
+                                undefined,
+                            categoryId:
+                                settingsQuery.data?.defaultCategoryId ??
+                                undefined,
+                        }}
                         onSubmit={onSubmit}
                         disabled={isPending}
                         categoryOptions={categoryOptions}

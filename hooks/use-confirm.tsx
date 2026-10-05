@@ -10,9 +10,15 @@ import {
     DialogTitle,
 } from '@/components/ui/dialog'
 
+type ConfirmOptions = {
+    confirmLabel?: string
+    destructive?: boolean
+}
+
 export const useConfirm = (
     title: string,
-    message: string
+    message: string,
+    { confirmLabel = 'Confirm', destructive = false }: ConfirmOptions = {}
 ): [() => JSX.Element, () => Promise<unknown>] => {
     const [promise, setPromise] = useState<{
         resolve: (value: boolean) => void
@@ -37,17 +43,23 @@ export const useConfirm = (
 
     const ConfirmationDialog = () => (
         <Dialog open={promise !== null} onOpenChange={handleCancel}>
-            <DialogContent>
+            <DialogContent className="sm:max-w-md">
                 <DialogHeader>
                     <DialogTitle>{title}</DialogTitle>
                     <DialogDescription>{message}</DialogDescription>
                 </DialogHeader>
 
-                <DialogFooter className="pt-2">
+                <DialogFooter className="gap-2 pt-2 sm:gap-0">
                     <Button onClick={handleCancel} variant="outline">
                         Cancel
                     </Button>
-                    <Button onClick={handleConfirm}>Confirm</Button>
+                    <Button
+                        onClick={handleConfirm}
+                        variant={destructive ? 'destructive' : 'default'}
+                        autoFocus={!destructive}
+                    >
+                        {confirmLabel}
+                    </Button>
                 </DialogFooter>
             </DialogContent>
         </Dialog>

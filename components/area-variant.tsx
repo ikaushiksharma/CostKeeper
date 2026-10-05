@@ -9,7 +9,6 @@ import {
 } from 'recharts'
 
 import { CustomTooltip } from './custom-tooltip'
-import { useTheme } from 'next-themes'
 
 type AreaVariantProps = {
     data: {
@@ -20,37 +19,43 @@ type AreaVariantProps = {
 }
 
 export const AreaVariant = ({ data }: AreaVariantProps) => {
-    const { theme } = useTheme()
     return (
-        <ResponsiveContainer width="100%" height={350}>
+        <ResponsiveContainer width="100%" height={320}>
             <AreaChart data={data}>
                 <CartesianGrid
-                    stroke={theme === 'dark' ? '#1E293B' : '#e2e8f0'}
+                    stroke="hsl(var(--border))"
                     strokeDasharray="3 3"
+                    vertical={false}
                 />
                 <defs>
-                    <linearGradient id="income" x1="0" y1="0" x2="0" y2="1">
+                    <linearGradient id="ck-income" x1="0" y1="0" x2="0" y2="1">
                         <stop
                             offset="2%"
-                            stopColor="#3d82f6"
-                            stopOpacity={0.8}
+                            stopColor="hsl(var(--income))"
+                            stopOpacity={0.25}
                         />
                         <stop
                             offset="98%"
-                            stopColor="#3d82f6"
+                            stopColor="hsl(var(--income))"
                             stopOpacity={0}
                         />
                     </linearGradient>
 
-                    <linearGradient id="expenses" x1="0" y1="0" x2="0" y2="1">
+                    <linearGradient
+                        id="ck-expenses"
+                        x1="0"
+                        y1="0"
+                        x2="0"
+                        y2="1"
+                    >
                         <stop
                             offset="2%"
-                            stopColor="#f43f5e"
-                            stopOpacity={0.8}
+                            stopColor="hsl(var(--expense))"
+                            stopOpacity={0.25}
                         />
                         <stop
                             offset="98%"
-                            stopColor="#f43f5e"
+                            stopColor="hsl(var(--expense))"
                             stopOpacity={0}
                         />
                     </linearGradient>
@@ -61,13 +66,19 @@ export const AreaVariant = ({ data }: AreaVariantProps) => {
                     tickLine={false}
                     dataKey="date"
                     tickFormatter={(value) => format(value, 'dd MMM')}
-                    style={{
-                        fontSize: '12px',
+                    tick={{
+                        fill: 'hsl(var(--muted-foreground))',
+                        fontSize: 12,
                     }}
-                    tickMargin={16}
+                    tickMargin={12}
+                    minTickGap={24}
                 />
 
                 <Tooltip
+                    cursor={{
+                        stroke: 'hsl(var(--border))',
+                        fill: 'hsl(var(--muted))',
+                    }}
                     content={({ active, payload }) => (
                         <CustomTooltip active={active} payload={payload} />
                     )}
@@ -78,9 +89,8 @@ export const AreaVariant = ({ data }: AreaVariantProps) => {
                     dataKey="income"
                     stackId="income"
                     strokeWidth={2}
-                    stroke="#3d82f6"
-                    fill="url(#income)"
-                    className="drop-shadow-sm"
+                    stroke="hsl(var(--income))"
+                    fill="url(#ck-income)"
                 />
 
                 <Area
@@ -88,9 +98,8 @@ export const AreaVariant = ({ data }: AreaVariantProps) => {
                     dataKey="expenses"
                     stackId="expenses"
                     strokeWidth={2}
-                    stroke="#f43f5e"
-                    fill="url(#expenses)"
-                    className="drop-shadow-sm"
+                    stroke="hsl(var(--expense))"
+                    fill="url(#ck-expenses)"
                 />
             </AreaChart>
         </ResponsiveContainer>

@@ -3,11 +3,13 @@ import { createSerwistRoute } from '@serwist/turbopack'
 
 // Precache entries need a revision so the offline fallback is re-fetched on
 // deploy. Vercel exposes the commit SHA; fall back to git locally.
+// `||` (not `??`) so an empty stdout, e.g. no git in the build image, still
+// falls through to a random revision instead of an empty one.
 const revision =
-    process.env.VERCEL_GIT_COMMIT_SHA ??
+    process.env.VERCEL_GIT_COMMIT_SHA ||
     spawnSync('git', ['rev-parse', 'HEAD'], {
         encoding: 'utf-8',
-    }).stdout?.trim() ??
+    }).stdout?.trim() ||
     crypto.randomUUID()
 
 export const { dynamic, dynamicParams, revalidate, generateStaticParams, GET } =

@@ -12,16 +12,11 @@ import { formatPercentage } from '@/lib/utils'
 import { CategoryTooltip } from './category-tooltip'
 
 const COLORS = [
-    // blue
-    '#0062FF',
-    // light blue
-    '#12C6FF',
-    // red
-    '#FF647F',
-    // orange
-    '#FF9354',
-    // purple
-    '#FF00FF',
+    'hsl(var(--chart-1))',
+    'hsl(var(--chart-2))',
+    'hsl(var(--chart-3))',
+    'hsl(var(--chart-4))',
+    'hsl(var(--chart-5))',
 ]
 
 type PieVariantProps = {
@@ -33,7 +28,7 @@ type PieVariantProps = {
 
 export const PieVariant = ({ data }: PieVariantProps) => {
     return (
-        <ResponsiveContainer width="100%" height={350}>
+        <ResponsiveContainer width="100%" height={320}>
             <PieChart>
                 <Legend
                     layout="horizontal"
@@ -61,7 +56,7 @@ export const PieVariant = ({ data }: PieVariantProps) => {
                                                 {entry.value}
                                             </span>
 
-                                            <span className="text-sm">
+                                            <span className="text-sm font-medium tabular-nums">
                                                 {formatPercentage(
                                                     (
                                                         entry.payload as unknown as {
@@ -91,7 +86,8 @@ export const PieVariant = ({ data }: PieVariantProps) => {
                     outerRadius={90}
                     innerRadius={60}
                     paddingAngle={2}
-                    fill="#8884d8"
+                    stroke="hsl(var(--card))"
+                    strokeWidth={2}
                     dataKey="value"
                     labelLine={false}
                 >

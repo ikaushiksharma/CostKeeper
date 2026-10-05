@@ -1,6 +1,6 @@
 'use client'
 
-import { Edit, MoreHorizontal, Trash } from 'lucide-react'
+import { MoreHorizontal, Pencil, Trash2 } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import {
@@ -22,8 +22,9 @@ export const Actions = ({ id }: ActionsProps) => {
     const { onOpen } = useOpenCategory()
 
     const [ConfirmDialog, confirm] = useConfirm(
-        'Are you sure?',
-        'You are about to delete this category.'
+        'Delete this category?',
+        'Transactions in it will become uncategorized.',
+        { confirmLabel: 'Delete', destructive: true }
     )
 
     const handleDelete = async () => {
@@ -39,7 +40,11 @@ export const Actions = ({ id }: ActionsProps) => {
             <ConfirmDialog />
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="size-8 p-0">
+                    <Button
+                        variant="ghost"
+                        className="size-8 p-0"
+                        aria-label="Row actions"
+                    >
                         <MoreHorizontal className="size-4" />
                     </Button>
                 </DropdownMenuTrigger>
@@ -49,15 +54,16 @@ export const Actions = ({ id }: ActionsProps) => {
                         disabled={deleteMutation.isPending}
                         onClick={() => onOpen(id)}
                     >
-                        <Edit className="size-4 mr-2" />
+                        <Pencil className="size-4 mr-2" />
                         Edit
                     </DropdownMenuItem>
 
                     <DropdownMenuItem
                         disabled={deleteMutation.isPending}
                         onClick={handleDelete}
+                        className="text-destructive focus:text-destructive focus:bg-destructive/10"
                     >
-                        <Trash className="size-4 mr-2" />
+                        <Trash2 className="size-4 mr-2" />
                         Delete
                     </DropdownMenuItem>
                 </DropdownMenuContent>

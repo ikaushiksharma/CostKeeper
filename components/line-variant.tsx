@@ -9,7 +9,6 @@ import {
 } from 'recharts'
 
 import { CustomTooltip } from '@/components/custom-tooltip'
-import { useTheme } from 'next-themes'
 
 type LineVariantProps = {
     data: {
@@ -20,13 +19,13 @@ type LineVariantProps = {
 }
 
 export const LineVariant = ({ data }: LineVariantProps) => {
-    const { theme } = useTheme()
     return (
-        <ResponsiveContainer width="100%" height={350}>
+        <ResponsiveContainer width="100%" height={320}>
             <LineChart data={data}>
                 <CartesianGrid
-                    stroke={theme === 'dark' ? '#1E293B' : '#e2e8f0'}
+                    stroke="hsl(var(--border))"
                     strokeDasharray="3 3"
+                    vertical={false}
                 />
 
                 <XAxis
@@ -34,13 +33,19 @@ export const LineVariant = ({ data }: LineVariantProps) => {
                     tickLine={false}
                     dataKey="date"
                     tickFormatter={(value) => format(value, 'dd MMM')}
-                    style={{
-                        fontSize: '12px',
+                    tick={{
+                        fill: 'hsl(var(--muted-foreground))',
+                        fontSize: 12,
                     }}
-                    tickMargin={16}
+                    tickMargin={12}
+                    minTickGap={24}
                 />
 
                 <Tooltip
+                    cursor={{
+                        stroke: 'hsl(var(--border))',
+                        fill: 'hsl(var(--muted))',
+                    }}
                     content={({ active, payload }) => (
                         <CustomTooltip active={active} payload={payload} />
                     )}
@@ -49,16 +54,14 @@ export const LineVariant = ({ data }: LineVariantProps) => {
                 <Line
                     dot={false}
                     dataKey="income"
-                    stroke="#3d82f6"
+                    stroke="hsl(var(--income))"
                     strokeWidth={2}
-                    className="drop-shadow-sm"
                 />
                 <Line
                     dot={false}
                     dataKey="expenses"
-                    stroke="#f43f5e"
+                    stroke="hsl(var(--expense))"
                     strokeWidth={2}
-                    className="drop-shadow-sm"
                 />
             </LineChart>
         </ResponsiveContainer>

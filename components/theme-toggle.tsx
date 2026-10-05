@@ -1,6 +1,6 @@
 'use client'
 
-import { Moon, Sun } from 'lucide-react'
+import { Check, Monitor, Moon, Sun } from 'lucide-react'
 import { useTheme } from 'next-themes'
 
 import { Button } from '@/components/ui/button'
@@ -11,8 +11,14 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 
+const options = [
+    { value: 'light', label: 'Light', icon: Sun },
+    { value: 'dark', label: 'Dark', icon: Moon },
+    { value: 'system', label: 'System', icon: Monitor },
+] as const
+
 export function ThemeToggle() {
-    const { setTheme } = useTheme()
+    const { theme, setTheme } = useTheme()
 
     return (
         <DropdownMenu>
@@ -20,23 +26,27 @@ export function ThemeToggle() {
                 <Button
                     variant="ghost"
                     size="icon"
-                    className="rounded-full h-8 w-8"
+                    className="relative rounded-full size-9"
+                    aria-label="Change theme"
                 >
-                    <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-                    <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-                    <span className="sr-only">Toggle theme</span>
+                    <Sun className="size-[18px] rotate-0 scale-100 transition-transform dark:-rotate-90 dark:scale-0" />
+                    <Moon className="absolute size-[18px] rotate-90 scale-0 transition-transform dark:rotate-0 dark:scale-100" />
                 </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => setTheme('light')}>
-                    Light
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setTheme('dark')}>
-                    Dark
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setTheme('system')}>
-                    System
-                </DropdownMenuItem>
+            <DropdownMenuContent align="end" className="min-w-36">
+                {options.map(({ value, label, icon: Icon }) => (
+                    <DropdownMenuItem
+                        key={value}
+                        onClick={() => setTheme(value)}
+                        className="gap-2"
+                    >
+                        <Icon className="size-4 text-muted-foreground" />
+                        {label}
+                        {theme === value && (
+                            <Check className="ml-auto size-4" />
+                        )}
+                    </DropdownMenuItem>
+                ))}
             </DropdownMenuContent>
         </DropdownMenu>
     )

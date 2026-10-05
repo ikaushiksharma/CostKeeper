@@ -35,7 +35,7 @@ export const NewCategorySheet = () => {
         <Sheet open={isOpen || mutation.isPending} onOpenChange={onClose}>
             <SheetContent className="space-y-4">
                 <SheetHeader>
-                    <SheetTitle>New Category</SheetTitle>
+                    <SheetTitle>New category</SheetTitle>
 
                     <SheetDescription>
                         Create a new category to organize your transactions.

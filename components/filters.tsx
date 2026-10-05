@@ -6,16 +6,16 @@ import { DateFilter } from './date-filter'
 import { Skeleton } from './ui/skeleton'
 
 const FiltersContent = () => (
-    <div className="flex flex-col lg:flex-row items-center gap-y-2 lg:gap-y-0 lg:gap-x-2">
+    <div className="flex flex-col sm:flex-row items-stretch gap-2">
         <AccountFilter />
         <DateFilter />
     </div>
 )
 
 const FiltersFallback = () => (
-    <div className="flex flex-col lg:flex-row items-center gap-y-2 lg:gap-y-0 lg:gap-x-2">
-        <Skeleton className="h-9 w-full lg:w-auto lg:min-w-[120px]" />
-        <Skeleton className="h-9 w-full lg:w-auto lg:min-w-[200px]" />
+    <div className="flex flex-col sm:flex-row items-stretch gap-2">
+        <Skeleton className="h-10 w-full sm:w-40" />
+        <Skeleton className="h-10 w-full sm:w-64" />
     </div>
 )
 
