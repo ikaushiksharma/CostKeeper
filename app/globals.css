@@ -36,11 +36,13 @@
         --income: 160 84% 27%;
         --expense: 350 72% 45%;
 
+        /* Categorical series (goals, category pie). Validated with the dataviz
+           palette checks: green, blue, orange, violet, magenta in this order. */
         --chart-1: 160 84% 30%;
-        --chart-2: 199 72% 40%;
-        --chart-3: 38 92% 48%;
-        --chart-4: 350 72% 52%;
-        --chart-5: 240 5% 55%;
+        --chart-2: 213 68% 50%;
+        --chart-3: 17 82% 56%;
+        --chart-4: 249 48% 44%;
+        --chart-5: 337 70% 70%;
     }
 
     .dark {
@@ -70,11 +72,11 @@
         --income: 158 64% 52%;
         --expense: 351 85% 68%;
 
-        --chart-1: 158 64% 52%;
-        --chart-2: 199 80% 62%;
-        --chart-3: 38 92% 60%;
-        --chart-4: 351 85% 68%;
-        --chart-5: 240 5% 60%;
+        --chart-1: 158 69% 39%;
+        --chart-2: 213 77% 56%;
+        --chart-3: 17 70% 50%;
+        --chart-4: 247 69% 72%;
+        --chart-5: 338 61% 58%;
     }
 }
 

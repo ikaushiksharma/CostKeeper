@@ -32,7 +32,7 @@ export function Segmented<T extends string>({
             role="radiogroup"
             aria-label={label}
             className={cn(
-                'inline-flex items-center gap-0.5 rounded-md bg-muted p-0.5',
+                'inline-flex max-w-full items-center gap-0.5 overflow-x-auto rounded-md bg-muted p-0.5 [scrollbar-width:none]',
                 className
             )}
         >
@@ -50,7 +50,7 @@ export function Segmented<T extends string>({
                         title={iconOnly ? option.label : undefined}
                         onClick={() => onChange(option.value)}
                         className={cn(
-                            'inline-flex h-8 flex-1 items-center justify-center gap-1.5 rounded-[7px] px-2.5 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                            'inline-flex h-8 flex-1 items-center justify-center gap-1.5 whitespace-nowrap rounded-[7px] px-2.5 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
                             active
                                 ? 'bg-card text-foreground shadow-sm'
                                 : 'text-muted-foreground hover:text-foreground'

@@ -1,5 +1,6 @@
 'use client'
-import { Plus, WalletCards } from 'lucide-react'
+import { Plus, Shapes, WalletCards } from 'lucide-react'
+import Link from 'next/link'
 
 import { DataTable } from '@/components/data-table'
 import { EmptyState } from '@/components/empty-state'
@@ -28,9 +29,21 @@ const AccountsPage = () => {
             title="Your accounts"
             count={accounts.length}
             actions={
-                <Button size="sm" onClick={newAccount.onOpen}>
-                    <Plus className="size-4" /> New account
-                </Button>
+                <>
+                    <Button
+                        size="sm"
+                        variant="outline"
+                        asChild
+                        className="md:hidden"
+                    >
+                        <Link href="/categories">
+                            <Shapes className="size-4" /> Categories
+                        </Link>
+                    </Button>
+                    <Button size="sm" onClick={newAccount.onOpen}>
+                        <Plus className="size-4" /> New account
+                    </Button>
+                </>
             }
         >
             <DataTable

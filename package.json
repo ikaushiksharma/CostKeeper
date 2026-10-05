@@ -4,6 +4,7 @@
     "private": true,
     "scripts": {
         "dev": "next dev",
+        "dev:local": "DATABASE_URL=postgres://postgres:postgres@db.localtest.me:5433/costkeeper next dev",
         "build": "next build",
         "start": "next start",
         "lint": "biome lint",
@@ -14,6 +15,10 @@
         "db:generate": "drizzle-kit generate",
         "db:migrate": "drizzle-kit migrate",
         "db:studio": "drizzle-kit studio",
+        "db:local:up": "docker compose up -d --wait",
+        "db:local:down": "docker compose down",
+        "db:local:clone": "bash scripts/clone-prod-db.sh",
+        "db:local:studio": "DATABASE_URL=postgres://postgres:postgres@localhost:5433/costkeeper drizzle-kit studio",
         "typecheck": "tsc --noEmit",
         "lint:fix": "biome lint --write",
         "check": "biome check",

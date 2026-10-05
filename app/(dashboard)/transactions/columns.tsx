@@ -3,6 +3,8 @@
 import type { ColumnDef } from '@tanstack/react-table'
 import { format } from 'date-fns'
 import type { InferResponseType } from 'hono'
+import { Target } from 'lucide-react'
+import Link from 'next/link'
 
 import { SortHeader } from '@/components/sort-header'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -60,11 +62,23 @@ export const columns: ColumnDef<ResponseType>[] = [
         header: ({ column }) => <SortHeader column={column} label="Category" />,
         cell: ({ row }) => {
             return (
-                <CategoryColumn
-                    id={row.original.id}
-                    category={row.original.category}
-                    categoryId={row.original.categoryId}
-                />
+                <div className="flex items-center gap-1.5">
+                    <CategoryColumn
+                        id={row.original.id}
+                        category={row.original.category}
+                        categoryId={row.original.categoryId}
+                    />
+                    {row.original.goalId && (
+                        <Link
+                            href={`/goals/${row.original.goalId}`}
+                            title="Counts toward this goal, not income or expenses"
+                            className="inline-flex h-7 items-center gap-1 rounded-full bg-brand-soft px-2.5 text-xs font-medium text-brand hover:bg-brand-soft/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                        >
+                            <Target className="size-3.5" />
+                            {row.original.goal}
+                        </Link>
+                    )}
+                </div>
             )
         },
     },

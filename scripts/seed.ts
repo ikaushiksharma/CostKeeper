@@ -51,7 +51,7 @@ const SEED_ACCOUNTS = [
 const defaultTo = new Date()
 const defaultFrom = subDays(defaultTo, 30)
 
-const SEED_TRANSACTIONS: (typeof transactions.$inferSelect)[] = []
+const SEED_TRANSACTIONS: (typeof transactions.$inferInsert)[] = []
 
 const generateRandomAmount = (category: typeof categories.$inferInsert) => {
     switch (category.name) {

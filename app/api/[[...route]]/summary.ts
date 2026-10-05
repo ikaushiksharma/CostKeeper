@@ -4,7 +4,7 @@ import { fillMissingDays } from '@/lib/utils'
 import { clerkMiddleware, getAuth } from '@hono/clerk-auth'
 import { zValidator } from '@hono/zod-validator'
 import { parse, startOfMonth } from 'date-fns'
-import { and, desc, eq, gte, lt, lte, sql, sum } from 'drizzle-orm'
+import { and, desc, eq, gte, isNull, lt, lte, sql, sum } from 'drizzle-orm'
 import { Hono } from 'hono'
 import { z } from 'zod'
 
@@ -62,6 +62,7 @@ const app = new Hono().get(
                             ? eq(transactions.accountId, accountId)
                             : undefined,
                         eq(accounts.userId, userId),
+                        isNull(transactions.goalId),
                         gte(transactions.date, startDate),
                         lte(transactions.date, endDate)
                     )
@@ -108,6 +109,7 @@ const app = new Hono().get(
                         ? eq(transactions.accountId, accountId)
                         : undefined,
                     eq(accounts.userId, auth.userId),
+                    isNull(transactions.goalId),
                     lt(transactions.amount, 0),
                     gte(transactions.date, startDate),
                     lte(transactions.date, endDate)
@@ -147,6 +149,7 @@ const app = new Hono().get(
                         ? eq(transactions.accountId, accountId)
                         : undefined,
                     eq(accounts.userId, auth.userId),
+                    isNull(transactions.goalId),
                     gte(transactions.date, startDate),
                     lte(transactions.date, endDate)
                 )

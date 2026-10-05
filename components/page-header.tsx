@@ -11,6 +11,10 @@ const pages: Record<string, { title: string; description: string }> = {
         title: 'Transactions',
         description: 'Every entry in one place. Search, sort and edit.',
     },
+    '/goals': {
+        title: 'Goals',
+        description: 'Targets you are working toward, period by period.',
+    },
     '/accounts': {
         title: 'Accounts',
         description: 'Where your money lives: bank, cash and cards.',
@@ -43,7 +47,12 @@ const OverviewTitle = () => {
 
 export const PageHeader = () => {
     const pathname = usePathname()
-    const page = pages[pathname]
+    // Longest matching prefix, so /goals/<id> still gets the Goals header.
+    const page =
+        pages[pathname] ??
+        Object.entries(pages)
+            .filter(([path]) => pathname.startsWith(`${path}/`))
+            .sort(([a], [b]) => b.length - a.length)[0]?.[1]
     const isOverview = pathname === '/'
 
     return (

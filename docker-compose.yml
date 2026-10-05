@@ -1,0 +1,47 @@
+# Local database for development. Mirrors prod (Neon, Postgres 16).
+#
+# The app talks to Neon over HTTP (edge runtime), so a plain Postgres is not
+# enough: `neon-proxy` speaks Neon's HTTP protocol and forwards to `postgres`.
+# See db/drizzle.ts for how the driver is pointed at it.
+#
+#   bun run db:local:up      start both containers
+#   bun run db:local:clone   copy prod data into the local database
+#   bun run dev:local        run the app against the local database
+name: costkeeper
+
+services:
+    postgres:
+        image: postgres:16-alpine
+        container_name: costkeeper-postgres
+        environment:
+            POSTGRES_USER: postgres
+            POSTGRES_PASSWORD: postgres
+            POSTGRES_DB: costkeeper
+        ports:
+            # 5433 so it does not clash with another local Postgres on 5432.
+            - '5433:5432'
+        volumes:
+            - costkeeper-pgdata:/var/lib/postgresql/data
+        healthcheck:
+            test: ['CMD-SHELL', 'pg_isready -U postgres -d costkeeper']
+            interval: 2s
+            timeout: 3s
+            retries: 15
+
+    neon-proxy:
+        image: ghcr.io/timowilhelm/local-neon-http-proxy:main
+        container_name: costkeeper-neon-proxy
+        environment:
+            # The proxy keeps its own bookkeeping table (neon_control_plane) in
+            # this database. It is the default `postgres` db, not `costkeeper`,
+            # so re-cloning prod data never wipes it. Queries still go to the
+            # database named in the app's DATABASE_URL.
+            PG_CONNECTION_STRING: postgres://postgres:postgres@postgres:5432/postgres
+        ports:
+            - '4444:4444'
+        depends_on:
+            postgres:
+                condition: service_healthy
+
+volumes:
+    costkeeper-pgdata:

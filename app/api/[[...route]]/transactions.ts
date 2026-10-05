@@ -2,7 +2,19 @@ import { clerkMiddleware, getAuth } from '@hono/clerk-auth'
 import { zValidator } from '@hono/zod-validator'
 import { createId } from '@paralleldrive/cuid2'
 import { endOfMonth, parse, startOfMonth, subMonths } from 'date-fns'
-import { and, desc, eq, gt, gte, inArray, lte, sql } from 'drizzle-orm'
+import {
+    and,
+    desc,
+    eq,
+    gt,
+    gte,
+    inArray,
+    isNull,
+    lte,
+    ne,
+    or,
+    sql,
+} from 'drizzle-orm'
 import { Hono } from 'hono'
 import { z } from 'zod'
 
@@ -10,12 +22,21 @@ import { db } from '@/db/drizzle'
 import {
     accounts,
     categories,
+    goals,
     insertTransactionSchema,
     transactions,
 } from '@/db/schema'
 import { parseTransactionMessage } from '@/lib/gemini'
 
 const DEFAULT_PAGE_SIZE = 20
+
+// Goal links are only written by the goals API, which checks the goal belongs
+// to the user. Generic writes must not be able to attach rows to any goal.
+const writableTransactionSchema = insertTransactionSchema.omit({
+    id: true,
+    goalId: true,
+    goalRole: true,
+})
 
 const app = new Hono()
     .get(
@@ -62,6 +83,8 @@ const app = new Hono()
                     notes: transactions.notes,
                     account: accounts.name,
                     accountId: transactions.accountId,
+                    goal: goals.name,
+                    goalId: transactions.goalId,
                 })
                 .from(transactions)
                 .innerJoin(accounts, eq(transactions.accountId, accounts.id))
@@ -69,12 +92,18 @@ const app = new Hono()
                     categories,
                     eq(transactions.categoryId, categories.id)
                 )
+                .leftJoin(goals, eq(transactions.goalId, goals.id))
                 .where(
                     and(
                         accountId
                             ? eq(transactions.accountId, accountId)
                             : undefined,
                         eq(accounts.userId, auth.userId),
+                        // Target markers are bookkeeping, not money movement.
+                        or(
+                            isNull(transactions.goalRole),
+                            ne(transactions.goalRole, 'target')
+                        ),
                         gte(transactions.date, startDate),
                         lte(transactions.date, endDate)
                     )
@@ -124,7 +153,8 @@ const app = new Hono()
                     eq(accounts.userId, auth.userId),
                     gte(transactions.date, lastMonthStart),
                     lte(transactions.date, lastMonthEnd),
-                    gt(transactions.amount, 0)
+                    gt(transactions.amount, 0),
+                    isNull(transactions.goalId)
                 )
             )
             .orderBy(desc(transactions.date))
@@ -181,12 +211,7 @@ const app = new Hono()
     .post(
         '/',
         clerkMiddleware(),
-        zValidator(
-            'json',
-            insertTransactionSchema.omit({
-                id: true,
-            })
-        ),
+        zValidator('json', writableTransactionSchema),
         async (ctx) => {
             const auth = getAuth(ctx)
             const values = ctx.req.valid('json')
@@ -225,7 +250,7 @@ const app = new Hono()
     .post(
         '/bulk-create',
         clerkMiddleware(),
-        zValidator('json', z.array(insertTransactionSchema.omit({ id: true }))),
+        zValidator('json', z.array(writableTransactionSchema)),
         async (ctx) => {
             const auth = getAuth(ctx)
             const values = ctx.req.valid('json')
@@ -305,12 +330,7 @@ const app = new Hono()
                 id: z.string().optional(),
             })
         ),
-        zValidator(
-            'json',
-            insertTransactionSchema.omit({
-                id: true,
-            })
-        ),
+        zValidator('json', writableTransactionSchema),
         async (ctx) => {
             const auth = getAuth(ctx)
             const { id } = ctx.req.valid('param')

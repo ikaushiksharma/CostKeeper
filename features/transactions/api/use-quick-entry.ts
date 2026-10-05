@@ -42,6 +42,10 @@ export const useQuickEntry = () => {
             }
             queryClient.invalidateQueries({ queryKey: ['transactions'] })
             queryClient.invalidateQueries({ queryKey: ['summary'] })
+            queryClient.invalidateQueries({ queryKey: ['goals'] })
+            queryClient.invalidateQueries({ queryKey: ['goal'] })
+            queryClient.invalidateQueries({ queryKey: ['goal-contributions'] })
+            queryClient.invalidateQueries({ queryKey: ['goal-stats'] })
         },
         onError: (error) => {
             toast.error(error.message || 'Failed to create transaction.')
