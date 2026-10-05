@@ -1,48 +1,55 @@
 {
-    "version": "5",
-    "dialect": "pg",
-    "entries": [
-        {
-            "idx": 0,
-            "version": "5",
-            "when": 1722074944212,
-            "tag": "0000_supreme_karnak",
-            "breakpoints": true
-        },
-        {
-            "idx": 1,
-            "version": "6",
-            "when": 1772888876575,
-            "tag": "0001_parallel_hardball",
-            "breakpoints": true
-        },
-        {
-            "idx": 2,
-            "version": "6",
-            "when": 1772911135559,
-            "tag": "0002_chemical_scorpion",
-            "breakpoints": true
-        },
-        {
-            "idx": 3,
-            "version": "6",
-            "when": 1772954711023,
-            "tag": "0003_moaning_thor",
-            "breakpoints": true
-        },
-        {
-            "idx": 4,
-            "version": "6",
-            "when": 1772958283305,
-            "tag": "0004_elite_kitty_pryde",
-            "breakpoints": true
-        },
-        {
-            "idx": 5,
-            "version": "6",
-            "when": 1791232497849,
-            "tag": "0005_goals",
-            "breakpoints": true
-        }
-    ]
+  "version": "5",
+  "dialect": "pg",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "5",
+      "when": 1722074944212,
+      "tag": "0000_supreme_karnak",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1772888876575,
+      "tag": "0001_parallel_hardball",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1772911135559,
+      "tag": "0002_chemical_scorpion",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1772954711023,
+      "tag": "0003_moaning_thor",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1772958283305,
+      "tag": "0004_elite_kitty_pryde",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1791232497849,
+      "tag": "0005_goals",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1791238313462,
+      "tag": "0006_goal_sort_order",
+      "breakpoints": true
+    }
+  ]
 }

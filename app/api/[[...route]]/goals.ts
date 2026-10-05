@@ -129,6 +129,7 @@ export async function loadGoals(
             accountId: goals.accountId,
             account: accounts.name,
             createdAt: goals.createdAt,
+            sortOrder: goals.sortOrder,
         })
         .from(goals)
         .leftJoin(categories, eq(goals.categoryId, categories.id))
@@ -142,7 +143,7 @@ export async function loadGoals(
                     : undefined
             )
         )
-        .orderBy(asc(goals.createdAt))
+        .orderBy(asc(goals.sortOrder), asc(goals.createdAt))
 
     if (goalRows.length === 0) return []
 
@@ -309,6 +310,8 @@ const app = new Hono()
                     categoryId,
                     accountId: values.accountId || null,
                     notes: values.notes || null,
+                    // New goals go to the end of the user's list.
+                    sortOrder: sql`(select coalesce(max(${goals.sortOrder}), -1) + 1 from ${goals} where ${goals.userId} = ${auth.userId})`,
                 }),
                 db.insert(goalPeriods).values({
                     id: createId(),
@@ -322,6 +325,34 @@ const app = new Hono()
             ])
 
             return ctx.json({ data: { id: goalId } })
+        }
+    )
+    // Save a new card order. Ids are the user's goals in display order; any
+    // id that is not theirs is ignored.
+    .patch(
+        '/reorder',
+        clerkMiddleware(),
+        zValidator(
+            'json',
+            z.object({ ids: z.array(z.string()).min(1).max(500) })
+        ),
+        async (ctx) => {
+            const auth = getAuth(ctx)
+            if (!auth?.userId) {
+                return ctx.json({ error: 'Unauthorized.' }, 401)
+            }
+            const { ids } = ctx.req.valid('json')
+
+            const updated = await db.execute(sql`
+                update ${goals} set sort_order = x.position - 1
+                -- One JSON parameter: drizzle would expand a JS array into a row.
+                from jsonb_array_elements_text(${JSON.stringify(ids)}::jsonb) with ordinality as x(id, position)
+                where ${goals.id} = x.id and ${goals.userId} = ${auth.userId}
+            `)
+
+            return ctx.json({
+                data: { updated: updated.rowCount ?? ids.length },
+            })
         }
     )
     .patch(

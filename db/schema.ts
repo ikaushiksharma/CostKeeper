@@ -77,6 +77,8 @@ export const goals = pgTable(
             onDelete: 'set null',
         }),
         notes: text('notes'),
+        // Position on the Goals page, set by drag-to-reorder (lowest first).
+        sortOrder: integer('sort_order').notNull().default(0),
         createdAt: timestamp('created_at', { mode: 'date' }).defaultNow(),
         archivedAt: timestamp('archived_at', { mode: 'date' }),
     },

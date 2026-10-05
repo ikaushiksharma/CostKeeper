@@ -1,16 +1,19 @@
 'use client'
 
-import { Plus, Target } from 'lucide-react'
-import { useState } from 'react'
+import { ArrowUpDown, Check, Plus, Target } from 'lucide-react'
+import { useEffect, useState } from 'react'
 
 import { EmptyState } from '@/components/empty-state'
 import { Segmented } from '@/components/segmented'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
+import type { Goal } from '@/features/goals/api/shared'
 import { useGetGoals } from '@/features/goals/api/use-get-goals'
+import { useReorderGoals } from '@/features/goals/api/use-reorder-goals'
 import { GoalCard } from '@/features/goals/components/goal-card'
 import { GoalsStats } from '@/features/goals/components/goal-stats'
+import { SortableGoalGrid } from '@/features/goals/components/sortable-goal-grid'
 import { useGoalSheet } from '@/features/goals/hooks/use-goal-sheet'
 
 type Tab = 'active' | 'paused' | 'archived'
@@ -38,7 +41,30 @@ const GoalsPage = () => {
     // Stats cover every goal, archived ones included, so history is kept.
     const allGoalsQuery = useGetGoals('all')
     const goalSheet = useGoalSheet()
-    const goals = goalsQuery.data ?? []
+    const reorderMutation = useReorderGoals()
+    const [reordering, setReordering] = useState(false)
+    // Local order while reordering, so cards move instantly; cleared when
+    // fresh data arrives from the server.
+    const [order, setOrder] = useState<string[] | null>(null)
+    // biome-ignore lint/correctness/useExhaustiveDependencies: reset the optimistic order whenever the server list changes.
+    useEffect(() => setOrder(null), [goalsQuery.data])
+
+    const fetched = goalsQuery.data ?? []
+    const goals = order
+        ? order
+              .map((id) => fetched.find((g) => g.id === id))
+              .filter((g): g is Goal => !!g)
+        : fetched
+
+    const changeTab = (next: Tab) => {
+        setTab(next)
+        setReordering(false)
+    }
+
+    const handleReorder = (ids: string[]) => {
+        setOrder(ids)
+        reorderMutation.mutate(ids)
+    }
 
     return (
         <div className="space-y-4">
@@ -46,7 +72,7 @@ const GoalsPage = () => {
                 <Segmented
                     label="Goal status"
                     value={tab}
-                    onChange={setTab}
+                    onChange={changeTab}
                     options={[
                         { value: 'active', label: 'Active' },
                         { value: 'paused', label: 'Paused' },
@@ -54,10 +80,40 @@ const GoalsPage = () => {
                     ]}
                     className="w-full sm:w-auto"
                 />
-                <Button size="sm" onClick={() => goalSheet.onOpen()}>
-                    <Plus className="size-4" /> New goal
-                </Button>
+                <div className="flex items-center gap-2">
+                    {fetched.length > 1 && (
+                        <Button
+                            size="sm"
+                            variant={reordering ? 'default' : 'outline'}
+                            onClick={() => setReordering((r) => !r)}
+                            aria-pressed={reordering}
+                        >
+                            {reordering ? (
+                                <>
+                                    <Check className="size-4" /> Done
+                                </>
+                            ) : (
+                                <>
+                                    <ArrowUpDown className="size-4" /> Reorder
+                                </>
+                            )}
+                        </Button>
+                    )}
+                    {!reordering && (
+                        <Button size="sm" onClick={() => goalSheet.onOpen()}>
+                            <Plus className="size-4" /> New goal
+                        </Button>
+                    )}
+                </div>
             </div>
+
+            {reordering && (
+                <p className="text-sm text-muted-foreground">
+                    Drag the cards into the order you want. With a keyboard,
+                    focus a card, press space, move it with the arrow keys and
+                    press space again.
+                </p>
+            )}
 
             {goalsQuery.isLoading ? (
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
@@ -95,6 +151,8 @@ const GoalsPage = () => {
                         }
                     />
                 </Card>
+            ) : reordering ? (
+                <SortableGoalGrid goals={goals} onReorder={handleReorder} />
             ) : (
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
                     {goals.map((goal) => (
