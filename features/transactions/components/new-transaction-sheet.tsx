@@ -49,6 +49,8 @@ export const NewTransactionSheet = () => {
         categoryMutation.isPending ||
         accountMutation.isPending
     const settingsQuery = useGetSettings()
+    // Settings only pre-fill defaults. With none saved the form opens with
+    // empty account and category, and if settings fail it still opens.
     const isLoading =
         categoryQuery.isLoading ||
         accountQuery.isLoading ||
@@ -85,10 +87,10 @@ export const NewTransactionSheet = () => {
                             payee: '',
                             notes: '',
                             accountId:
-                                settingsQuery.data?.defaultAccountId ??
+                                settingsQuery.data?.defaultAccountId ||
                                 undefined,
                             categoryId:
-                                settingsQuery.data?.defaultCategoryId ??
+                                settingsQuery.data?.defaultCategoryId ||
                                 undefined,
                         }}
                         onSubmit={onSubmit}

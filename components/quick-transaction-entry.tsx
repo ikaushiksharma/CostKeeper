@@ -30,9 +30,9 @@ export function QuickTransactionEntry() {
             {
                 message: message.trim(),
                 defaultAccountId:
-                    settingsQuery.data?.defaultAccountId ?? undefined,
+                    settingsQuery.data?.defaultAccountId || undefined,
                 defaultCategoryId:
-                    settingsQuery.data?.defaultCategoryId ?? undefined,
+                    settingsQuery.data?.defaultCategoryId || undefined,
             },
             {
                 onSuccess: () => {

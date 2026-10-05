@@ -11,6 +11,7 @@ import {
     transactions,
 } from '@/db/schema'
 import { parseTransactionMessage } from '@/lib/gemini'
+import { upsertSettings } from '@/lib/settings'
 import {
     answerCallbackQuery,
     formatAmount,
@@ -434,10 +435,7 @@ async function handleCallbackQuery(callbackQuery: TelegramCallbackQuery) {
         }
 
         // Update default account in centralized settings
-        await db
-            .update(settings)
-            .set({ defaultAccountId: accountId })
-            .where(eq(settings.userId, user.userId))
+        await upsertSettings(user.userId, { defaultAccountId: accountId })
 
         await answerCallbackQuery(queryId, {
             text: `Default account set to: ${account.name}`,
@@ -488,10 +486,7 @@ async function handleCallbackQuery(callbackQuery: TelegramCallbackQuery) {
         }
 
         // Update default category in centralized settings
-        await db
-            .update(settings)
-            .set({ defaultCategoryId: categoryId })
-            .where(eq(settings.userId, user.userId))
+        await upsertSettings(user.userId, { defaultCategoryId: categoryId })
 
         await answerCallbackQuery(queryId, {
             text: `Default category set to: ${category.name}`,

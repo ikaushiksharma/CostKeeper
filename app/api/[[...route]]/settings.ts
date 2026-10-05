@@ -5,6 +5,7 @@ import { zValidator } from '@hono/zod-validator'
 import { eq } from 'drizzle-orm'
 import { Hono } from 'hono'
 import { z } from 'zod'
+import { DEFAULT_SETTINGS, upsertSettings } from '@/lib/settings'
 
 const app = new Hono()
     .get('/', clerkMiddleware(), async (ctx) => {
@@ -23,7 +24,8 @@ const app = new Hono()
             .from(settings)
             .where(eq(settings.userId, auth.userId))
 
-        return ctx.json({ data: data?.[0] })
+        // Users who never saved a setting have no row yet.
+        return ctx.json({ data: data[0] ?? DEFAULT_SETTINGS })
     })
     .patch(
         '/',
@@ -45,10 +47,7 @@ const app = new Hono()
                 return ctx.json({ error: 'Unauthorized.' }, 401)
             }
 
-            await db
-                .update(settings)
-                .set(values)
-                .where(eq(settings.userId, auth.userId))
+            await upsertSettings(auth.userId, values)
 
             return ctx.json({ success: true })
         }
